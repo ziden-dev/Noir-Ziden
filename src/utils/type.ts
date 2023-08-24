@@ -1,0 +1,4 @@
+enum Portal {
+    Issuer,
+    Holder
+}
