@@ -12,10 +12,10 @@ fn less_than(x: Field, y: Field) ->  bool {
     res
 }
 
-fn from_le_bits(bits: [u1], from: u8, to: u8) -> Field{
+fn from_le_bits<N>(bits: [u1;N]) -> Field{
     let mut res: Field = 0;
     let mut mul2: Field = 1;
-    for i in from..to{
+    for i in 0..N{
         if(bits[i] == 1){
             res = res + mul2;
         }
@@ -25,6 +25,19 @@ fn from_le_bits(bits: [u1], from: u8, to: u8) -> Field{
 
     res
 }
+
+fn from_le_bytes<N>(bytes: [u8;N]) -> Field{
+    
+    let mut res: Field = 0;
+    let mut mul2: Field = 1;
+    for i in 0..N{ 
+        res = res + mul2 * (bytes[i] as Field);
+        mul2 = mul2 * 256;
+    }
+
+    res
+}
+
 
 fn from_be_bytes(bytes: [u8; 32]) -> (Field, Field){
     let mut hi: Field = 0;

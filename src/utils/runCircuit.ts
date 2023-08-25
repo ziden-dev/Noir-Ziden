@@ -1,20 +1,10 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { uint8ArrayToBigInt } from '../crypto/wasmcurves/utils.js';
 
 const rootPath = path.resolve("./src");
 var circuitsPath = rootPath + '/circuits/';
-
-function uint8ArrayToBigInt(uint8Array: Uint8Array) {
-    let result = 0n;
-
-    for (let i = 0; i < uint8Array.length; i++) {
-        result <<= 8n;
-        result += BigInt(uint8Array[i]);
-    }
-
-    return result;
-}
 
 function convertToHex(val: any) {
     var res;
@@ -29,7 +19,6 @@ export function prove_and_verify(proof: object) {
             if (Array.isArray(value)) {
                 return `${key}=[${value.map(val => (convertToHex(val))).join(",")}]`;
             } else {
-                console.log(value)
                 return `${key}=${convertToHex(value)}`;
             }
         })

@@ -16,9 +16,23 @@ mod indexed_merkle_tree;
 
 fn verify_claim_fields(claim: [Field; 8], expected_schema: Field, valid_until: Field, expected_sequel: Field, expected_subject: Field) {
     let slot0bits = claim[0].to_le_bits(254);
-    let actual_schema = utils::from_le_bits(slot0bits, 0, 128);
-    let expiration_time = utils::from_le_bits(slot0bits, 128, 192);
-    let actual_sequel = utils::from_le_bits(slot0bits, 192, 224);
+    let mut schema_bits = [0; 128];
+    for i in 0..128{
+        schema_bits[i] = slot0bits[i];
+    }
+    let actual_schema = utils::from_le_bits(schema_bits);
+
+    let mut expiration_bits = [0; 64];
+    for i in 128..192{
+        expiration_bits[i - 128] = slot0bits[i];
+    }
+    let expiration_time = utils::from_le_bits(expiration_bits);
+
+    let mut sequel_bits = [0; 32];
+    for i in 192..224{
+        sequel_bits[i - 192] = slot0bits[i];
+    }
+    let actual_sequel = utils::from_le_bits(sequel_bits);
     assert(actual_schema == expected_schema);
     assert(actual_sequel == expected_sequel);
     let unexpired = (expiration_time == 0) | utils::less_than(expiration_time, valid_until);
