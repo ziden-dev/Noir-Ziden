@@ -1,4 +1,5 @@
 use dep::std;
+mod claim;
 mod indexed_merkle_tree;
 mod id_ownership_by_signature;
 // fn main(root_old: pub Field, root_new: pub Field, path_low: [Field; 3], index_low: Field, val_low: Field, next_val_low: Field, 
@@ -7,6 +8,7 @@ mod id_ownership_by_signature;
 //   indexed_merkle_tree::insert(root_old, root_new, path_low, index_low, val_low, next_val_low,next_idx_low, val, index, path_new);
 // }
 
+/*
 fn main(public_key_x: Field,
             public_key_y: Field,
             auth_path: [Field; 3],
@@ -38,4 +40,9 @@ fn main(public_key_x: Field,
             signature_r8_x,
             signature_r8_y,
             challenge);
+}
+*/
+
+fn main (claim: [Field; 8], expected_schema: Field, valid_until: Field,expected_sequel: Field, expected_subject: Field) {
+        claim::verify_claim_fields(claim, expected_schema, valid_until, expected_sequel, expected_subject);
 }
