@@ -2,6 +2,7 @@
   "dependencies": {
     "@typechain/ethers-v5": "^10.1.0",
     "@types/eccrypto": "^1.1.3",
+    "bigint-buffer": "^1.1.5",
     "blake2": "^5.0.0",
     "circomlibjs": "^0.1.7",
     "dotenv": "^16.0.3",

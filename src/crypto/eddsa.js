@@ -9,7 +9,7 @@ export default async function buildEddsa(F) {
   return new Eddsa(babyJub, poseidon);
 }
 
-class Eddsa {
+export class Eddsa {
   constructor(babyJub, poseidon) {
     this.babyJub = babyJub;
     this.poseidon = poseidon;
