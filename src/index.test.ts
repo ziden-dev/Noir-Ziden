@@ -1,10 +1,11 @@
 import { expect } from "chai";
 import { buildPoseidon } from "./crypto/poseidon_wasm.js"
 import { IndexedMerkleTree } from "./tree/indexedMerkleTree.js";
+// import { Holder } from "./state/state.js";
+// import { getPublicKeyFromPrivateKey, idOwnershipBySignature } from "./witness/authen.js";
+import pkg from 'secp256k1';
 import { prove_and_verify } from "./utils/runCircuit.js";
-import { Holder } from "./state/state.js";
-import { getPublicKeyFromPrivateKey, idOwnershipBySignature } from "./witness/authen.js";
-
+const { ecdsaSign, publicKeyCreate } = pkg;
 
 describe("test", () => {
     let poseidon: any;
@@ -81,32 +82,64 @@ describe("test", () => {
 
     // })
 
+    // it("circuit id ownership by signature", async () => {
+
+    //     var privateKey1 = BigInt(123456);
+    //     var privateKey2 = BigInt(12345);
+    //     var privateKey3 = BigInt(1234);
+
+    //     var pubkey1 = await getPublicKeyFromPrivateKey(privateKey1);
+    //     var pubkey2 = await getPublicKeyFromPrivateKey(privateKey2);
+    //     var pubkey3 = await getPublicKeyFromPrivateKey(privateKey3);
+
+    //     var holder = new Holder(3, poseidon);
+    //     holder.addAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
+    //     holder.addAuth(pubkey2.publicKeyX, pubkey2.publicKeyY);
+    //     holder.addAuth(pubkey3.publicKeyX, pubkey3.publicKeyY);
+
+    //     holder.revokeAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
+    //     holder.revokeAuth(pubkey2.publicKeyX, pubkey2.publicKeyY);
+
+    //     const challenge = BigInt('1234565');
+
+    //     var input = await idOwnershipBySignature(privateKey3, holder, challenge);
+
+    //     console.log(input);
+    //     if (input != null) prove_and_verify(input);
+    // })
+
     it("circuit id ownership by signature", async () => {
 
-        var privateKey1 = BigInt(123456);
-        var privateKey2 = BigInt(12345);
-        var privateKey3 = BigInt(1234);
+        const messageHash = Buffer.alloc(32, 2);
+        const prvKey = Buffer.alloc(32, 1);
 
-        var pubkey1 = await getPublicKeyFromPrivateKey(privateKey1);
-        var pubkey2 = await getPublicKeyFromPrivateKey(privateKey2);
-        var pubkey3 = await getPublicKeyFromPrivateKey(privateKey3);
+        // const messageHash = Buffer.from(sha256(message).slice(2), "hex");
 
-        var holder = new Holder(3, poseidon);
-        holder.addAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
-        holder.addAuth(pubkey2.publicKeyX, pubkey2.publicKeyY);
-        holder.addAuth(pubkey3.publicKeyX, pubkey3.publicKeyY);
+        const pubKey = publicKeyCreate(prvKey, false);
 
-        holder.revokeAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
-        holder.revokeAuth(pubkey2.publicKeyX, pubkey2.publicKeyY);
+        const pubKeyX = pubKey.slice(1, 33);
+        const pubKeyY = pubKey.slice(33, 65);
 
-        const challenge = BigInt('1234565');
+        const ret = ecdsaSign(messageHash, prvKey);
 
-        var input = await idOwnershipBySignature(privateKey3, holder, challenge);
+        // console.log(messageHash);
 
-        console.log(input);
-        if (input != null) prove_and_verify(input);
+        // console.log(pubKeyX, pubKeyY);
+
+        // console.log(ret);
+
+        var input = {
+            _public_key_x: pubKeyX,
+            _public_key_y: pubKeyY,
+            _signature: [ret.signature.slice(0, 32), ret.signature.slice(32)],
+            _message_hash: messageHash
+        }
+
+        prove_and_verify(input);
+        // const recovered = ecdsaRecover(ret.signature, ret.recid, message);
     })
 })
+
 
 
 

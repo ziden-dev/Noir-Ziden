@@ -9,7 +9,7 @@ function uint8ArrayToBigInt(uint8Array: Uint8Array) {
     let result = 0n;
 
     for (let i = 0; i < uint8Array.length; i++) {
-        result <<= 8n; // Dịch trái 8 bit (tương đương nhân cho 256)
+        result <<= 8n;
         result += BigInt(uint8Array[i]);
     }
 
@@ -24,14 +24,12 @@ function convertToHex(val: any) {
 }
 
 export function prove_and_verify(proof: object) {
-
     const formattedData = Object.entries(proof)
         .map(([key, value]) => {
             if (Array.isArray(value)) {
-
                 return `${key}=[${value.map(val => (convertToHex(val))).join(",")}]`;
             } else {
-                //console.log(value)
+                console.log(value)
                 return `${key}=${convertToHex(value)}`;
             }
         })
