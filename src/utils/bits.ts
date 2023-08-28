@@ -1,4 +1,5 @@
 import { toBigIntBE, toBufferBE } from "bigint-buffer";
+import { bigInt2BytesLE } from "../crypto/wasmcurves/utils.js";
 /**
  * Allocates a new Buffer from a bigInt number in little-endian format
  * @category utils
@@ -51,3 +52,24 @@ export function bufferToHex(buff: Buffer): string {
   return bitsToNum(buff).toString(16);
 }
 
+export function uint8ArrayToBigInt(uint8Array: Uint8Array) {
+  let result = 0n;
+
+  for (let i = 0; i < uint8Array.length; i++) {
+    result <<= 8n; // Dịch trái 8 bit (tương đương nhân cho 256)
+    result += BigInt(uint8Array[i]);
+  }
+
+  return result;
+}
+
+export function convertToHexAndPad(val: any) {
+  var res;
+  if (val instanceof Uint8Array) res = uint8ArrayToBigInt(val).toString(16);
+  else res = BigInt(val).toString(16);
+  return `0x${"0".repeat(64 - res.length)}${res}`;
+}
+
+export function numToBytesLE(num: BigInt) {
+  return bigInt2BytesLE(num, 32);
+}

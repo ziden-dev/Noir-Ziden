@@ -1,27 +1,63 @@
 import { expect } from "chai";
-import { buildPoseidon } from "./crypto/poseidon_wasm.js"
+import { buildPoseidon } from "./crypto/poseidon_wasm.js";
 import { IndexedMerkleTree } from "./tree/indexedMerkleTree.js";
 import { Holder } from "./state/state.js";
-import { getEDDSAPublicKeyFromPrivateKey, stateTransitionByEDDSASignature } from "./witness/authen.js";
-import { prove_and_verify } from "./utils/runCircuit.js";
+import {
+    getEDDSAPublicKeyFromPrivateKey,
+    stateTransitionByEDDSASignature
+} from "./utils/keys.js";
+import {
+    Crs,
+    newBarretenbergApiAsync,
+    RawBuffer,
+} from "@aztec/bb.js/dest/node/index.js";
+import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
+import circuit from "./circuits/claim/target/claim.json" assert { type: "json" };
+import { decompressSync } from "fflate";
+
+
 
 describe("test", () => {
     let poseidon: any;
+    let acirBuffer: any;
+    let acirBufferUncompressed: any;
+    let api: any;
+    let acirComposer: any;
+
     before(async () => {
         poseidon = await buildPoseidon();
-    })
+        acirBuffer = Buffer.from(circuit.bytecode, "base64");
+        acirBufferUncompressed = decompressSync(acirBuffer);
+        api = await newBarretenbergApiAsync(4);
+        const [_exact, circuitSize, _subgroup] = await api.acirGetCircuitSizes(
+            acirBufferUncompressed
+        );
+        const subgroupSize = Math.pow(2, Math.ceil(Math.log2(circuitSize)));
+        const crs = await Crs.new(subgroupSize + 1);
+        await api.commonInitSlabAllocator(subgroupSize);
+        await api.srsInitSrs(
+            new RawBuffer(crs.getG1Data()),
+            crs.numPoints,
+            new RawBuffer(crs.getG2Data())
+        );
+
+        acirComposer = await api.acirNewAcirComposer(subgroupSize);
+    });
 
     it("poseidon", async () => {
         const res = poseidon([1, 2]);
-        expect(poseidon.F.toString(res)).equal(BigInt("0x115cc0f5e7d690413df64c6b9662e9cf2a3617f2743245519e19607a4417189a").toString(10));
-    })
+        expect(poseidon.F.toString(res)).equal(
+            BigInt(
+                "0x115cc0f5e7d690413df64c6b9662e9cf2a3617f2743245519e19607a4417189a"
+            ).toString(10)
+        );
+    });
 
     it("js insert tree", async () => {
-
         //   root
         //    /\
         //   a  zero[2]
-        //  /  \    
+        //  /  \
         // b    c
         // /\   /\
         //0  3 1  zero[0]
@@ -32,7 +68,6 @@ describe("test", () => {
 
         tree.insert(3n);
         tree.insert(1n);
-
 
         var leaf1 = tree.hash([0n, 1n, 2n]);
         var leaf2 = tree.hash([3n, 0n, 0n]);
@@ -56,15 +91,14 @@ describe("test", () => {
 
             expect(root).equal(root2);
         }
-
-    })
+    });
 
     // it("circuit insert tree", async () => {
 
     //     //   root
     //     //    /\
     //     //   a  zero[2]
-    //     //  /  \    
+    //     //  /  \
     //     // b    c
     //     // /\   /\
     //     //0  3 1  zero[0]
@@ -91,9 +125,9 @@ describe("test", () => {
         var pubkey3 = await getEDDSAPublicKeyFromPrivateKey(privateKey3);
 
         var holder = new Holder(3, poseidon);
-        holder.addAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
+        holder.addAuth(pubkey1.X, pubkey1.Y);
 
-        var input = await stateTransitionByEDDSASignature(
+        var inputs = await stateTransitionByEDDSASignature(
             privateKey1,
             holder,
             [
@@ -103,7 +137,28 @@ describe("test", () => {
             ]
         )
 
-        if (input != null) prove_and_verify(input);
+        const witness = new Map<number, string>();
+
+
+
+
+        console.log(witness);
+
+        const witnessMap = await executeCircuit(acirBuffer, witness, () => {
+            throw Error("unexpected oracle");
+        });
+
+        const witnessBuff = compressWitness(witnessMap);
+
+        const proof = await api.acirCreateProof(
+            acirComposer,
+            acirBufferUncompressed,
+            decompressSync(witnessBuff),
+            false
+        );
+
+        await api.acirInitProvingKey(acirComposer, acirBufferUncompressed);
+        const verified = await api.acirVerifyProof(acirComposer, proof, false);
     })
 
     // it("circuit id ownership by signature", async () => {
@@ -136,8 +191,4 @@ describe("test", () => {
     //     prove_and_verify(input);
     //     // const recovered = ecdsaRecover(ret.signature, ret.recid, message);
     // })
-})
-
-
-
-
+});

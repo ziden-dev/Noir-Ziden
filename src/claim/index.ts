@@ -1,2 +1,4 @@
-export * from "./claim";
-export * from "./claim-builder";
+import Claim from "./claim.js";
+import ClaimBuilder from "./claim-builder.js";
+
+export default { Claim, ClaimBuilder };

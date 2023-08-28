@@ -1,6 +1,6 @@
-import buildEddsa from "./eddsa";
-import { getCurveFromName } from "./ffjavascript";
-import { buildPoseidon } from "./poseidon_wasm";
+import buildEddsa from "./eddsa.js";
+import { getCurveFromName } from "./ffjavascript.js";
+import { buildPoseidon } from "./poseidon_wasm.js";
 
 export class CryptographyPrimitives {
   bn128: any;
