@@ -117,6 +117,58 @@ describe("Test claim logic", () => {
       ...ecdsaPublicKey.X,
       ...ecdsaPublicKey.Y,
       ...ecdsaSignature,
+      2,
+      claim.getSlotValue(2).valueOf() + BigInt(1),
+      1,
+    ];
+
+    inputs.forEach((input, index) => {
+      witness.set(index + 1, convertToHexAndPad(input));
+    });
+
+    console.log(witness);
+
+    const witnessMap = await executeCircuit(acirBuffer, witness, () => {
+      throw Error("unexpected oracle");
+    });
+
+    const witnessBuff = compressWitness(witnessMap);
+
+    const proof = await api.acirCreateProof(
+      acirComposer,
+      acirBufferUncompressed,
+      decompressSync(witnessBuff),
+      false
+    );
+
+    await api.acirInitProvingKey(acirComposer, acirBufferUncompressed);
+    const verified = await api.acirVerifyProof(acirComposer, proof, false);
+
+    expect(verified).to.be.true;
+  });
+
+  it("the valid witness should pass the circuit test - membership check", async () => {
+    const validUntil = BigInt(Date.now() + 30 * 60 * 1000);
+
+    const witness = new Map<number, string>();
+
+    const inputs = [
+      ...claim.allSlots,
+      schemaHash,
+      validUntil,
+      sequel,
+      subject,
+      eddsaPublicKey.X,
+      eddsaPublicKey.Y,
+      eddsaSignature.S,
+      eddsaSignature.R8X,
+      eddsaSignature.R8Y,
+      ...ecdsaPublicKey.X,
+      ...ecdsaPublicKey.Y,
+      ...ecdsaSignature,
+      2,
+      claim.getSlotValue(2).valueOf() + BigInt(1),
+      1,
     ];
 
     inputs.forEach((input, index) => {
@@ -163,6 +215,9 @@ describe("Test claim logic", () => {
       ...ecdsaPublicKey.X,
       ...ecdsaPublicKey.Y,
       ...ecdsaSignature,
+      2,
+      claim.getSlotValue(2).valueOf() + BigInt(1),
+      1,
     ];
 
     inputs.forEach((input, index) => {
@@ -187,7 +242,44 @@ describe("Test claim logic", () => {
 
     expect(verified).to.be.false;
   });
+  it("the witness that unfulfilles the query mustn't pass the circuit test", async () => {
 
+    const validUntil = BigInt(Date.now() + 30 * 60 * 1000);
+
+    const witness = new Map<number, string>();
+
+    const inputs = [
+      ...claim.allSlots,
+      schemaHash,
+      validUntil,
+      sequel,
+      subject,
+      eddsaPublicKey.X,
+      eddsaPublicKey.Y,
+      eddsaSignature.S,
+      eddsaSignature.R8X,
+      eddsaSignature.R8Y,
+      ...ecdsaPublicKey.X,
+      ...ecdsaPublicKey.Y,
+      ...ecdsaSignature,
+      2,
+      claim.getSlotValue(4),
+      0,
+    ];
+
+    inputs.forEach((input, index) => {
+      witness.set(index + 1, convertToHexAndPad(input));
+    });
+
+    let witnessMap;
+    try {
+      witnessMap = await executeCircuit(acirBuffer, witness, () => {
+        throw Error("unexpected oracle");
+      });
+    } catch (err) {}
+
+    expect(witnessMap).to.be.undefined;
+  });
   it("the witness with a wrong schema hash mustn't pass the circuit test", async () => {
     const wrongSchemaHash = BigInt("93819749189437913479");
     let wrongClaim = claim.clone();
@@ -210,6 +302,9 @@ describe("Test claim logic", () => {
       ...ecdsaPublicKey.X,
       ...ecdsaPublicKey.Y,
       ...ecdsaSignature,
+      2,
+      claim.getSlotValue(2).valueOf() + BigInt(1),
+      1,
     ];
 
     inputs.forEach((input, index) => {
@@ -248,6 +343,9 @@ describe("Test claim logic", () => {
       ...ecdsaPublicKey.X,
       ...ecdsaPublicKey.Y,
       ...ecdsaSignature,
+      2,
+      claim.getSlotValue(2).valueOf() + BigInt(1),
+      1,
     ];
 
     inputs.forEach((input, index) => {
@@ -286,6 +384,9 @@ describe("Test claim logic", () => {
       ...ecdsaPublicKey.X,
       ...ecdsaPublicKey.Y,
       ...ecdsaSignature,
+      2,
+      claim.getSlotValue(2).valueOf() + BigInt(1),
+      1,
     ];
 
     inputs.forEach((input, index) => {

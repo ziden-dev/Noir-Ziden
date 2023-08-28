@@ -64,4 +64,30 @@ fn verify_claim_ecdsa_signature(
     assert(std::ecdsa_secp256k1::verify_signature(public_key_x ,public_key_y,signature, claim_hash.to_le_bytes(32)) == true);
 }
 
+/*
+0: equal
+1: greater than
+2: less than
+*/
+fn query_single_value(claim: [Field; 8], slot_index: u8, attesting_value: Field, operator: u8){
+    let value = claim[slot_index];
+    if(operator == 0){
+        assert(value == attesting_value);
+    }else if(operator == 1){
+        assert(utils::less_than(value, attesting_value) == true);
+    }else if(operator == 2){
+        assert(utils::less_than(attesting_value, value) == true);
+    }
+}
+
+fn verify_membership<N>(claim: [Field; 8], slot_index: u8, root: Field, index: Field, merkle_proof: [Field; N]){
+    let value = claim[slot_index];
+    let expected_root = utils::cal_root_from_mtp(merkle_proof, value, index);
+    assert(expected_root == root);
+}
+
+fn verify_non_membership<N>(claim: [Field; 8], slot_index: u8, path_low: [Field; N], val_low: Field, next_val: Field, next_idx: Field, index_low: Field, root: Field){
+    let value = claim[slot_index];
+    assert(indexed_merkle_tree::check_non_membership(path_low, val_low, value, next_val, next_idx, index_low, root) == true);
+}
 
