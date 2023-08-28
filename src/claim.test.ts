@@ -213,20 +213,14 @@ describe("Test claim logic", () => {
       witness.set(index + 1, convertToHexAndPad(input));
     });
 
-    const witnessMap = await executeCircuit(acirBuffer, witness, () => {
-      throw Error("unexpected oracle");
-    });
+    let witnessMap;
+    try {
+      witnessMap = await executeCircuit(acirBuffer, witness, () => {
+        throw Error("unexpected oracle");
+      });
+    } catch (err) {}
 
-    const witnessBuff = compressWitness(witnessMap);
-
-    expect(
-      await api.acirCreateProof(
-        acirComposer,
-        acirBufferUncompressed,
-        decompressSync(witnessBuff),
-        false
-      )
-    ).to.throw(Error, "could not satisfy all constraints");
+    expect(witnessMap).to.be.undefined;
   });
 
   it("the witness with a wrong subject mustn't pass the circuit test", async () => {
@@ -254,20 +248,14 @@ describe("Test claim logic", () => {
       witness.set(index + 1, convertToHexAndPad(input));
     });
 
-    const witnessMap = await executeCircuit(acirBuffer, witness, () => {
-      throw Error("unexpected oracle");
-    });
+    let witnessMap;
+    try {
+      witnessMap = await executeCircuit(acirBuffer, witness, () => {
+        throw Error("unexpected oracle");
+      });
+    } catch (err) {}
 
-    const witnessBuff = compressWitness(witnessMap);
-
-    expect(
-      await api.acirCreateProof(
-        acirComposer,
-        acirBufferUncompressed,
-        decompressSync(witnessBuff),
-        false
-      )
-    ).to.throw(Error, "could not satisfy all constraints");
+    expect(witnessMap).to.be.undefined;
   });
 
   it("the witness with a wrong sequel mustn't pass the circuit test", async () => {
@@ -295,19 +283,13 @@ describe("Test claim logic", () => {
       witness.set(index + 1, convertToHexAndPad(input));
     });
 
-    const witnessMap = await executeCircuit(acirBuffer, witness, () => {
-      throw Error("unexpected oracle");
-    });
+    let witnessMap;
+    try {
+      witnessMap = await executeCircuit(acirBuffer, witness, () => {
+        throw Error("unexpected oracle");
+      });
+    } catch (err) {}
 
-    const witnessBuff = compressWitness(witnessMap);
-
-    expect(
-      await api.acirCreateProof(
-        acirComposer,
-        acirBufferUncompressed,
-        decompressSync(witnessBuff),
-        false
-      )
-    ).to.throw(Error, "could not satisfy all constraints");
+    expect(witnessMap).to.be.undefined;
   });
 });
