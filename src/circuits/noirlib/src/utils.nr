@@ -26,6 +26,19 @@ fn from_le_bits<N>(bits: [u1; N]) -> Field{
     res
 }
 
+fn from_le_bytes<N>(bytes: [u8;N]) -> Field{
+    
+    let mut res: Field = 0;
+    let mut mul2: Field = 1;
+    for i in 0..N{ 
+        res = res + mul2 * (bytes[i] as Field);
+        mul2 = mul2 * 256;
+    }
+
+    res
+}
+
+
 fn from_be_bytes(bytes: [u8; 32]) -> (Field, Field){
     let mut hi: Field = 0;
     let mut lo: Field = 0;
@@ -52,4 +65,13 @@ fn cal_root_from_mtp<N>(path: [Field; N], leaf: Field, index: Field) -> Field {
       current = std::hash::poseidon::bn254::hash_2([hash_left, hash_right]);
     };
     current
+}
+
+fn fields_to_u8_array<N, M>(x: [Field;N], mut z: [u8; M]) {
+    for i in 0..N {
+        let y = x[i].to_le_bytes(32);
+        for j in 0..32 {
+            z[i*32+j] = y[j];
+        }
+    }
 }

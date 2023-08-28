@@ -4,42 +4,16 @@ import { IndexedMerkleTree } from "../tree/indexedMerkleTree.js";
 
 export abstract class Entity {
     authTree: AuthMerkleTree;
-    revokedAuthTree: IndexedMerkleTree;
 
     constructor(n: number, hasher: any) {
         this.authTree = new AuthMerkleTree(n, hasher);
-        this.revokedAuthTree = new IndexedMerkleTree(n, hasher);
     }
 
     getAuthProof(publicKeyX: bigint) {
-        var publicKeyY;
-        var authPath;
-        var authIndex;
-        for (const [index, leaf] of this.authTree.leaves.entries()) {
-            if (leaf.publicKeyX == publicKeyX) {
-                publicKeyY = leaf.publicKeyY;
-                authPath = this.authTree.getPathProof(index).path;
-                authIndex = index;
-                break;
-            }
-        }
-        if (publicKeyY == null || authPath == null || authIndex == null) return null;
-
-        var value = this.authTree.hash([publicKeyX, publicKeyY]);
-        var { leafLow, pathLow, idxLow } = this.revokedAuthTree.getPathProofLow(value);
         return {
-            public_key_x: publicKeyX,
-            public_key_y: publicKeyY,
-            auth_path: authPath,
-            auth_index: authIndex,
-            revoked_auth_path: pathLow,
-            revoked_auth_index: idxLow,
-            revoked_auth_value_low: leafLow.val,
-            revoked_auth_next_value_low: leafLow.nextVal,
-            revoked_auth_next_index_low: leafLow.nextIdx,
-            revoked_auth_root: this.revokedAuthTree.getRoot(),
+            ...this.authTree.getAuthProof(publicKeyX),
             state: this.state()
-        }
+        };
     }
 
     abstract state(): bigint;
@@ -48,15 +22,15 @@ export abstract class Entity {
         this.authTree.insert(publicKeyX, publickeyY);
     }
 
-    revokeAuth(publicKeyX: bigint, publickeyY: bigint) {
-        this.revokedAuthTree.insert(this.authTree.hash([publicKeyX, publickeyY]));
+    revokeAuth(publicKeyX: bigint) {
+        this.authTree.remove(publicKeyX);
     }
 }
 
 export class Holder extends Entity {
 
     state() {
-        return this.authTree.hash([this.authTree.getRoot(), this.revokedAuthTree.getRoot()]);
+        return this.authTree.getRoot();
     }
 
 }
@@ -72,8 +46,7 @@ export class Issuer extends Entity {
     }
 
     state() {
-        return this.authTree.hash([this.authTree.getRoot(), this.revokedAuthTree.getRoot(),
-        this.claimTree.getRoot(), this.revokedClaimTree.getRoot()]);
+        return this.authTree.hash([this.authTree.getRoot(), this.claimTree.getRoot(), this.revokedClaimTree.getRoot()]);
     }
 
 

@@ -10,3 +10,5 @@ target
 cache
 artifacts
 
+**/*proofs*/
+**/*target*/

@@ -1,10 +1,9 @@
 import { expect } from "chai";
 import { buildPoseidon } from "./crypto/poseidon_wasm.js"
 import { IndexedMerkleTree } from "./tree/indexedMerkleTree.js";
-import { prove_and_verify } from "./utils/runCircuit.js";
 import { Holder } from "./state/state.js";
-import { getPublicKeyFromPrivateKey, idOwnershipBySignature } from "./witness/authen.js";
-
+import { getECDSAPublicKeyFromPrivateKey, idOwnershipByECDSASignature } from "./witness/authen.js";
+import { prove_and_verify } from "./utils/runCircuit.js";
 
 describe("test", () => {
     let poseidon: any;
@@ -83,30 +82,62 @@ describe("test", () => {
 
     it("circuit id ownership by signature", async () => {
 
-        var privateKey1 = BigInt(123456);
-        var privateKey2 = BigInt(12345);
-        var privateKey3 = BigInt(1234);
+        var privateKey1 = Buffer.alloc(32, 1);
+        var privateKey2 = Buffer.alloc(32, 2);
+        var privateKey3 = Buffer.alloc(32, 3);
 
-        var pubkey1 = await getPublicKeyFromPrivateKey(privateKey1);
-        var pubkey2 = await getPublicKeyFromPrivateKey(privateKey2);
-        var pubkey3 = await getPublicKeyFromPrivateKey(privateKey3);
+        var pubkey1 = await getECDSAPublicKeyFromPrivateKey(privateKey1);
+        var pubkey2 = await getECDSAPublicKeyFromPrivateKey(privateKey2);
+        var pubkey3 = await getECDSAPublicKeyFromPrivateKey(privateKey3);
 
         var holder = new Holder(3, poseidon);
         holder.addAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
         holder.addAuth(pubkey2.publicKeyX, pubkey2.publicKeyY);
         holder.addAuth(pubkey3.publicKeyX, pubkey3.publicKeyY);
 
-        holder.revokeAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
-        holder.revokeAuth(pubkey2.publicKeyX, pubkey2.publicKeyY);
+        holder.revokeAuth(pubkey1.publicKeyX);
+        holder.revokeAuth(pubkey2.publicKeyX);
 
-        const challenge = BigInt('1234565');
+        const challenge = Buffer.alloc(32, 4);
 
-        var input = await idOwnershipBySignature(privateKey3, holder, challenge);
+        var input = await idOwnershipByECDSASignature(privateKey3, holder, challenge);
 
-        console.log(input);
+
         if (input != null) prove_and_verify(input);
     })
+
+    // it("circuit id ownership by signature", async () => {
+
+    //     const messageHash = Buffer.alloc(32, 2);
+    //     const prvKey = Buffer.alloc(32, 1);
+
+    //     // const messageHash = Buffer.from(sha256(message).slice(2), "hex");
+
+    //     const pubKey = publicKeyCreate(prvKey, false);
+
+    //     const pubKeyX = pubKey.slice(1, 33);
+    //     const pubKeyY = pubKey.slice(33, 65);
+
+    //     const ret = ecdsaSign(messageHash, prvKey);
+
+    //     // console.log(messageHash);
+
+    //     // console.log(pubKeyX, pubKeyY);
+
+    //     // console.log(ret);
+
+    //     var input = {
+    //         _public_key_x: Array.from(pubKeyX),
+    //         _public_key_y: Array.from(pubKeyY),
+    //         _signature: Array.from(ret.signature),
+    //         _message_hash: messageHash
+    //     }
+
+    //     prove_and_verify(input);
+    //     // const recovered = ecdsaRecover(ret.signature, ret.recid, message);
+    // })
 })
+
 
 
 
