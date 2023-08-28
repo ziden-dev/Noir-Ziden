@@ -1,3 +1,4 @@
+import { PublicKeyType } from "src/utils/type.js";
 import { AuthMerkleTree } from "../tree/authTree.js";
 import { ClaimMerkleTree } from "../tree/claimTree.js";
 import { IndexedMerkleTree } from "../tree/indexedMerkleTree.js";
@@ -13,8 +14,8 @@ export abstract class Entity {
     abstract state(): bigint;
     abstract getAuthProof(publicKeyX: bigint): any;
 
-    addAuth(publicKeyX: bigint, publickeyY: bigint) {
-        this.authTree.insert(publicKeyX, publickeyY);
+    addAuth(publicKeyX: bigint, publickeyY: bigint, publicKeyType: PublicKeyType) {
+        this.authTree.insert(publicKeyX, publickeyY, publicKeyType);
     }
 
     revokeAuth(publicKeyX: bigint) {
@@ -59,7 +60,7 @@ export class Issuer extends Entity {
         return {
             ...this.authTree.getAuthProof(publicKeyX),
             claim_root: this.claimTree.getRoot(),
-            revoked_claim_root: this.authTree.getRoot(),
+            revoked_claim_root: this.revokedClaimTree.getRoot(),
             state: this.state(),
         };
     }

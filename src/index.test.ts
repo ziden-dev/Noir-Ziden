@@ -1,8 +1,8 @@
 import { expect } from "chai";
-import { buildPoseidon } from "./crypto/poseidon_wasm.js";
 import { IndexedMerkleTree } from "./tree/indexedMerkleTree.js";
-import { Holder } from "./state/state.js";
+import { Issuer } from "./state/state.js";
 import {
+    getECDSAPublicKeyFromPrivateKey,
     getEDDSAPublicKeyFromPrivateKey,
     stateTransitionByEDDSASignature
 } from "./utils/keys.js";
@@ -12,10 +12,10 @@ import {
     RawBuffer,
 } from "@aztec/bb.js/dest/node/index.js";
 import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
-import circuit from "./circuits/claim/target/claim.json" assert { type: "json" };
+import circuit from "./circuits/state/target/state.json" assert { type: "json" };
 import { decompressSync } from "fflate";
-
-
+import { convertToHexAndPad, object2Array } from "./utils/bits.js";
+import { CryptographyPrimitives } from "./crypto/index.js";
 
 describe("test", () => {
     let poseidon: any;
@@ -23,9 +23,11 @@ describe("test", () => {
     let acirBufferUncompressed: any;
     let api: any;
     let acirComposer: any;
+    let crypto: CryptographyPrimitives;
 
     before(async () => {
-        poseidon = await buildPoseidon();
+        crypto = await CryptographyPrimitives.getInstance();
+        poseidon = crypto.poseidon;
         acirBuffer = Buffer.from(circuit.bytecode, "base64");
         acirBufferUncompressed = decompressSync(acirBuffer);
         api = await newBarretenbergApiAsync(4);
@@ -43,6 +45,7 @@ describe("test", () => {
 
         acirComposer = await api.acirNewAcirComposer(subgroupSize);
     });
+
 
     it("poseidon", async () => {
         const res = poseidon([1, 2]);
@@ -114,7 +117,7 @@ describe("test", () => {
 
     // })
 
-    it("circuit id ownership by signature", async () => {
+    it("circuit state transition", async () => {
 
         var privateKey1 = BigInt("123");
         var privateKey2 = BigInt("12");
@@ -122,27 +125,32 @@ describe("test", () => {
 
         var pubkey1 = await getEDDSAPublicKeyFromPrivateKey(privateKey1);
         var pubkey2 = await getEDDSAPublicKeyFromPrivateKey(privateKey2);
-        var pubkey3 = await getEDDSAPublicKeyFromPrivateKey(privateKey3);
+        var pubkey3 = await getECDSAPublicKeyFromPrivateKey(privateKey3);
 
-        var holder = new Holder(3, poseidon);
-        holder.addAuth(pubkey1.X, pubkey1.Y);
+        var issuer = new Issuer(3, poseidon);
+        issuer.addAuth(pubkey1.X, pubkey1.Y, pubkey1.type);
 
-        var inputs = await stateTransitionByEDDSASignature(
+        // add pubkey2 and pubkey3 by ecdsa signature
+        var inputs2 = (await stateTransitionByEDDSASignature(
             privateKey1,
-            holder,
+            issuer,
             [
-                { type: "addAuthOperation", ...pubkey2 },
-                { type: "addAuthOperation", ...pubkey3 },
-                { type: "revokeAuthOperation", ...pubkey3 },
+                { type: "addAuth", ...{ publicKeyX: pubkey2.X, publicKeyY: pubkey2.Y, publicKeyType: pubkey2.type } },
+                { type: "addAuth", ...{ publicKeyX: pubkey3.X, publicKeyY: pubkey2.Y, publicKeyType: pubkey3.type } },
+                { type: "revokeAuth", ...{ publicKeyX: pubkey3.X } },
+                { type: "addClaim", ...{ slot: new Array(8).fill(1) } },
+                { type: "revokeClaim", ...{ claimHash: poseidon.F.toString(poseidon(new Array(8).fill(1))) } }
             ]
-        )
+        ));
 
         const witness = new Map<number, string>();
+        var inputs = object2Array(inputs2);
+        console.log(inputs2);
+        inputs.forEach((input, index) => {
+            witness.set(index + 1, convertToHexAndPad(input));
+        });
 
-
-
-
-        console.log(witness);
+        //console.log(witness);
 
         const witnessMap = await executeCircuit(acirBuffer, witness, () => {
             throw Error("unexpected oracle");
@@ -159,6 +167,9 @@ describe("test", () => {
 
         await api.acirInitProvingKey(acirComposer, acirBufferUncompressed);
         const verified = await api.acirVerifyProof(acirComposer, proof, false);
+
+        expect(verified).to.be.true;
+
     })
 
     // it("circuit id ownership by signature", async () => {

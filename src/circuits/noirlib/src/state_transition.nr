@@ -14,7 +14,7 @@ fn eddsa_state_verify<N>(
             signature_r8_x: Field,
             signature_r8_y:Field) {
     let challenge = std::hash::poseidon::bn254::hash_2([old_state, new_state]);
-    id_ownership_by_signature::verify_eddsa(
+    id_ownership_by_signature::eddsa_ownership_verify(
         public_key_x,
         public_key_y,
         auth_path,
@@ -40,7 +40,7 @@ fn ecdsa_state_verify<N>(
             new_state: Field,
             signature: [u8; 64]) {
     let challenge = std::hash::poseidon::bn254::hash_2([old_state, new_state]);
-    id_ownership_by_signature::verify_ecdsa(
+    id_ownership_by_signature::ecdsa_ownership_verify(
         public_key_x,
         public_key_y,
         auth_path,

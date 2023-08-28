@@ -5,11 +5,11 @@ class ClaimLeaf implements Leaf {
 
     constructor(slot: bigint[]) {
         if (slot.length == 8) this.slot = slot;
-        else this.slot = new Array(8).fill(BigInt(0));
+        else this.slot = new Array(8).fill(0n);
     }
 
     toNode(hash: Function) {
-        return hash([this.slot]);
+        return hash(this.slot);
     };
 
 }
@@ -19,7 +19,8 @@ export class ClaimMerkleTree extends MerkleTree {
     public leaves: ClaimLeaf[] = [];
 
     constructor(n: number, hasher: any) {
-        var zeroLeaf = new ClaimLeaf(new Array(8).fill(BigInt(0)));
+
+        var zeroLeaf = new ClaimLeaf(new Array(8).fill(0n));
         super(n, hasher, zeroLeaf);
         this.leaves.push(zeroLeaf);
     }

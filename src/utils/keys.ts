@@ -1,5 +1,3 @@
-import buildEddsa from "../crypto/eddsa.js";
-import { getCurveFromName } from "../crypto/ffjavascript.js";
 import { Entity, Issuer } from "../state/state.js";
 import pkg from "secp256k1";
 const { ecdsaSign, publicKeyCreate } = pkg;
@@ -8,18 +6,20 @@ import {
   uint8ArrayToBigInt,
 } from "../crypto/wasmcurves/utils.js";
 import { ECDSAPublickeyLEBytes } from "../index.js";
-import { numToBytesLE } from "./bits.js";
-import { AddAuthOperation, IssueClaimOperation, RevokeAuthOperation, RevokeClaimOperation, StateTransitionOperation } from "./type.js";
+
+import { AddAuthOperation, IssueClaimOperation, PublicKeyType, RevokeAuthOperation, RevokeClaimOperation, StateTransitionOperation } from "./type.js";
+import { CryptographyPrimitives } from "../crypto/index.js";
 
 export async function getEDDSAPublicKeyFromPrivateKey(privateKey: bigint) {
-  const bn128 = await getCurveFromName("bn128", true);
-  const F = bn128.Fr;
-  var eddsa = await buildEddsa(F);
+  const crypto = await CryptographyPrimitives.getInstance();
+  const F = crypto.bn128ScalarField;
+  var eddsa = crypto.eddsa;
 
   const pubkey = eddsa.prv2pub(bigInt2Uint8Array(privateKey, 32));
   return {
     X: F.toObject(pubkey[0]),
     Y: F.toObject(pubkey[1]),
+    type: PublicKeyType.EDDSA
   };
 }
 
@@ -29,9 +29,9 @@ export async function signEDDSAChallenge(
   privateKey: bigint,
   challenge: bigint
 ) {
-  const bn128 = await getCurveFromName("bn128", true);
-  const F = bn128.Fr;
-  var eddsa = await buildEddsa(F);
+  const crypto = await CryptographyPrimitives.getInstance();
+  const F = crypto.bn128ScalarField;
+  var eddsa = crypto.eddsa;
   const message = F.e(challenge);
   const signature = eddsa.signPoseidon(bigInt2Uint8Array(privateKey, 32), message);
   return {
@@ -60,7 +60,8 @@ export async function getECDSAPublicKeyFromPrivateKey(privateKey: bigint) {
   const pubKeyY = pubKey.slice(33, 65);
   return {
     X: uint8ArrayToBigInt(pubKeyX),
-    Y: uint8ArrayToBigInt(pubKeyY)
+    Y: uint8ArrayToBigInt(pubKeyY),
+    type: PublicKeyType.ECDSA
   }
 }
 export function getECDSAPublicKeyLEFromPrivateKey(
@@ -70,8 +71,8 @@ export function getECDSAPublicKeyLEFromPrivateKey(
   const pubKeyX = pubKey.slice(1, 33);
   const pubKeyY = pubKey.slice(33, 65);
   return {
-    X: numToBytesLE(uint8ArrayToBigInt(pubKeyX)),
-    Y: numToBytesLE(uint8ArrayToBigInt(pubKeyY)),
+    X: pubKeyX,
+    Y: pubKeyY,
   };
 }
 
@@ -94,23 +95,23 @@ export async function idOwnershipByECDSASignature(privateKey: bigint, entity: En
 function doOperations(entity: Entity, operations: StateTransitionOperation[]) {
   for (var operation of operations) {
     switch (operation.type) {
-      case "issueClaimOperation":
+      case "issueClaim":
         const issueClaimOperation = operation as IssueClaimOperation;
         if (entity instanceof Issuer) {
           entity.addClaim(issueClaimOperation.slot);
         }
         break;
-      case "revokeClaimOperation":
+      case "revokeClaim":
         const revokeClaimOperation = operation as RevokeClaimOperation;
         if (entity instanceof Issuer) {
           entity.revokeAuth(revokeClaimOperation.claimHash);
         }
         break;
-      case "addAuthOperation":
+      case "addAuth":
         const addAuthOperation = operation as AddAuthOperation;
-        entity.addAuth(addAuthOperation.publicKeyX, addAuthOperation.publicKeyY);
+        entity.addAuth(addAuthOperation.publicKeyX, addAuthOperation.publicKeyY, addAuthOperation.publicKeyType);
         break;
-      case "revokeAuthOperation":
+      case "revokeAuth":
         const revokeAuthOperation = operation as RevokeAuthOperation;
         entity.revokeAuth(revokeAuthOperation.publicKeyX);
         break;
@@ -123,6 +124,7 @@ export async function stateTransitionByEDDSASignature(privateKey: bigint, entity
   const pubkey = await getEDDSAPublicKeyFromPrivateKey(privateKey);
   const authProof = entity.getAuthProof(pubkey.X);
   authProof.old_state = authProof.state;
+  delete authProof.state;
   doOperations(entity, operations);
   const new_state = entity.state();
   const challenge = entity.authTree.hash([authProof.old_state, new_state]);
@@ -138,6 +140,7 @@ export async function stateTransitionByECDSASignature(privateKey: bigint, entity
   const pubkey = await getECDSAPublicKeyFromPrivateKey(privateKey);
   const authProof = entity.getAuthProof(pubkey.X);
   authProof.old_state = authProof.state;
+  delete authProof.state;
   doOperations(entity, operations);
   const new_state = entity.state();
   const challenge = entity.authTree.hash([authProof.old_state, new_state]);

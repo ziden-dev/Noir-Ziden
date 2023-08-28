@@ -11,7 +11,8 @@ export interface RevokeClaimOperation extends StateTransitionOperation {
 export interface AddAuthOperation extends StateTransitionOperation {
     type: "addAuth",
     publicKeyX: bigint,
-    publicKeyY: bigint
+    publicKeyY: bigint,
+    publicKeyType: PublicKeyType
 }
 
 export interface RevokeAuthOperation extends StateTransitionOperation {
@@ -21,4 +22,10 @@ export interface RevokeAuthOperation extends StateTransitionOperation {
 
 export interface StateTransitionOperation {
     type: string
+}
+
+export enum PublicKeyType {
+    EDDSA = 1,
+    ECDSA = 3,
+    None = 0
 }

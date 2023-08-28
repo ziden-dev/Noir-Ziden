@@ -9,8 +9,8 @@ export interface ECDSAPublicKey {
 }
 
 export interface ECDSAPublickeyLEBytes {
-  X: number[];
-  Y: number[];
+  X: Uint8Array;
+  Y: Uint8Array;
 }
 
 export interface EDDSASignature {
