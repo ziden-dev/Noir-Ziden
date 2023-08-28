@@ -1,5 +1,5 @@
-import { CryptographyPrimitives } from "src/crypto";
-import { bitsToNum, numToBits } from "src/utils/bits";
+import { CryptographyPrimitives } from "../crypto/index.js";
+import { bitsToNum, numToBits } from "../utils/bits.js";
 
 export default class Claim {
   private slots: Array<Buffer>;
@@ -27,6 +27,14 @@ export default class Claim {
     return bitsToNum(expireBits);
   }
 
+  get subject() {
+    return bitsToNum(this.slots[1]);
+  }
+
+  get allSlots() {
+    return this.slots.map((slot) => bitsToNum(slot));
+  }
+
   async claimHash() {
     const crypto = await CryptographyPrimitives.getInstance();
     const hashBits = crypto.poseidon(this.slots.map((e) => bitsToNum(e)));
@@ -36,13 +44,22 @@ export default class Claim {
   async eddsaSign(privateKey: Buffer) {
     const crypto = await CryptographyPrimitives.getInstance();
     const msg = crypto.poseidon(this.slots.map((e) => bitsToNum(e)));
-    return crypto.eddsa.signPoseidon(privateKey, msg);
+    let signature = crypto.eddsa.signPoseidon(privateKey, msg);
+    return {
+      r8x: crypto.bn128ScalarField.toObject(signature.R8[0]),
+      r8y: crypto.bn128ScalarField.toObject(signature.R8[1]),
+      s: signature.S,
+    };
   }
 
   getSlotValue(index: number) {
     if (index < 0 || index > 7)
       throw new Error("the index must be from 0 to 7");
     return bitsToNum(this.slots[index]);
+  }
+
+  clone(): Claim {
+    return new Claim(this.slots);
   }
 
   set schemaHash(schemaHash: BigInt) {
@@ -58,6 +75,11 @@ export default class Claim {
   set expirationTime(expirationTime: BigInt) {
     let expireBits = numToBits(expirationTime, 8);
     expireBits.copy(this.slots[0], 16);
+  }
+
+  set subject(subject: BigInt) {
+    let subjectBits = numToBits(subject, 32);
+    subjectBits.copy(this.slots[1]);
   }
 
   setSlotValue(index: number, value: BigInt) {

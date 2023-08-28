@@ -1,38 +1,23 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { convertToHexAndPad } from './bits.js';
 
 const rootPath = path.resolve("./src");
 var circuitsPath = rootPath + '/circuits/';
 
-function uint8ArrayToBigInt(uint8Array: Uint8Array) {
-    let result = 0n;
 
-    for (let i = 0; i < uint8Array.length; i++) {
-        result <<= 8n; // Dịch trái 8 bit (tương đương nhân cho 256)
-        result += BigInt(uint8Array[i]);
-    }
 
-    return result;
-}
+export function prove_and_verify(input: object) {
 
-function convertToHex(val: any) {
-    var res;
-    if (val instanceof Uint8Array) res = uint8ArrayToBigInt(val).toString(16);
-    else res = BigInt(val).toString(16);
-    return `"0x${'0'.repeat(64 - res.length)}${res}"`;
-}
-
-export function prove_and_verify(proof: object) {
-
-    const formattedData = Object.entries(proof)
+    const formattedData = Object.entries(input)
         .map(([key, value]) => {
             if (Array.isArray(value)) {
 
-                return `${key}=[${value.map(val => (convertToHex(val))).join(",")}]`;
+                return `${key}=[${value.map(val => (convertToHexAndPad(val))).join(",")}]`;
             } else {
                 //console.log(value)
-                return `${key}=${convertToHex(value)}`;
+                return `${key}=${convertToHexAndPad(value)}`;
             }
         })
         .join('\n');
