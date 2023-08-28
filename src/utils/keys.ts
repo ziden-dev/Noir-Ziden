@@ -9,7 +9,6 @@ import {
   uint8ArrayToBigInt,
 } from "../crypto/wasmcurves/utils.js";
 import { ECDSAPublicKey, ECDSAPublickeyLEBytes } from "src/index.js";
-import { numToBytesLE } from "./bits.js";
 
 export async function getEDDSAPublicKeyFromPrivateKey(privateKey: bigint) {
   const bn128 = await getCurveFromName("bn128", true);
@@ -74,14 +73,14 @@ export function getECDSAPublicKeyLEFromPrivateKey(
   const pubKeyX = pubKey.slice(1, 33);
   const pubKeyY = pubKey.slice(33, 65);
   return {
-    X: numToBytesLE(uint8ArrayToBigInt(pubKeyX)),
-    Y: numToBytesLE(uint8ArrayToBigInt(pubKeyY)),
+    X: pubKeyX,
+    Y: pubKeyY,
   };
 }
 
 export function signECDSAChallenge(
   privateKey: Buffer,
-  challenge: Buffer
+  challenge: Uint8Array
 ) {
   const res = ecdsaSign(challenge, privateKey);
   return Array.from(res.signature);
@@ -93,7 +92,7 @@ export async function idOwnershipByECDSASignature(
   challenge: Buffer
 ) {
   const pubkey = getECDSAPublicKeyFromPrivateKey(privateKey);
-  const signature = await signECDSAChallenge(privateKey, challenge);
+  const signature = signECDSAChallenge(privateKey, challenge);
   return {
     ...entity.getAuthProof(pubkey.X.valueOf()),
     signature,
