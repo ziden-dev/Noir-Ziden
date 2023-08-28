@@ -1,5 +1,7 @@
+import { ECDSASignature, EDDSASignature } from "src/index.js";
 import { CryptographyPrimitives } from "../crypto/index.js";
 import { bitsToNum, numToBits } from "../utils/bits.js";
+import { signECDSAChallenge } from "../utils/keys.js";
 
 export default class Claim {
   private slots: Array<Buffer>;
@@ -35,21 +37,31 @@ export default class Claim {
     return this.slots.map((slot) => bitsToNum(slot));
   }
 
-  async claimHash() {
+  private async _claimBinaryHash() {
     const crypto = await CryptographyPrimitives.getInstance();
-    const hashBits = crypto.poseidon(this.slots.map((e) => bitsToNum(e)));
-    return crypto.bn128ScalarField.toObject(hashBits);
+    return crypto.poseidon(this.slots.map((e) => bitsToNum(e)));
+  }
+  async claimHash(): Promise<BigInt> {
+    const binaryHash = await this._claimBinaryHash();
+    const crypto = await CryptographyPrimitives.getInstance();
+    return crypto.bn128ScalarField.toObject(binaryHash);
   }
 
-  async eddsaSign(privateKey: Buffer) {
+  async eddsaSign(privateKey: Buffer): Promise<EDDSASignature> {
     const crypto = await CryptographyPrimitives.getInstance();
-    const msg = crypto.poseidon(this.slots.map((e) => bitsToNum(e)));
+    const msg = await this._claimBinaryHash();
     let signature = crypto.eddsa.signPoseidon(privateKey, msg);
     return {
-      r8x: crypto.bn128ScalarField.toObject(signature.R8[0]),
-      r8y: crypto.bn128ScalarField.toObject(signature.R8[1]),
-      s: signature.S,
+      R8X: crypto.bn128ScalarField.toObject(signature.R8[0]),
+      R8Y: crypto.bn128ScalarField.toObject(signature.R8[1]),
+      S: signature.S,
     };
+  }
+
+  async ecdsaSign(privateKey: Buffer): Promise<ECDSASignature> {
+    const claimHash = await this.claimHash();
+    const msg = numToBits(claimHash, 32);
+    return signECDSAChallenge(privateKey, msg);
   }
 
   getSlotValue(index: number) {

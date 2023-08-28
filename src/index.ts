@@ -3,7 +3,20 @@ export interface EDDSAPublicKey {
   Y: BigInt;
 }
 
+export interface ECDSAPublicKey {
+  X: BigInt;
+  Y: BigInt;
+}
+
+export interface ECDSAPublickeyLEBytes {
+  X: number[];
+  Y: number[];
+}
+
 export interface EDDSASignature {
-  R8: Array<ArrayLike<number>>;
+  R8X: BigInt;
+  R8Y: BigInt;
   S: BigInt;
 }
+
+export type ECDSASignature = number[];

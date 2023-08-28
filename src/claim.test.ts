@@ -8,10 +8,16 @@ import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
 import circuit from "./circuits/claim/target/claim.json" assert { type: "json" };
 import { decompressSync } from "fflate";
 import { CryptographyPrimitives } from "./crypto/index.js";
-import { EDDSAPublicKey } from "./index.js";
+import {
+  ECDSAPublickeyLEBytes,
+  ECDSASignature,
+  EDDSAPublicKey,
+  EDDSASignature,
+} from "./index.js";
 import { convertToHexAndPad } from "./utils/bits.js";
 import Claim from "./claim/claim.js";
 import ClaimBuilder from "./claim/claim-builder.js";
+import { getECDSAPublicKeyLEFromPrivateKey } from "./utils/keys.js";
 
 describe("Test claim logic", () => {
   let acirBuffer: any;
@@ -27,8 +33,12 @@ describe("Test claim logic", () => {
   let subject: BigInt;
 
   let crypto: CryptographyPrimitives;
-  let privateKey: Buffer;
-  let publicKey: EDDSAPublicKey;
+  let eddsaPrivateKey: Buffer;
+  let eddsaPublicKey: EDDSAPublicKey;
+  let ecdsaPrivateKey: Buffer;
+  let ecdsaPublicKey: ECDSAPublickeyLEBytes;
+  let eddsaSignature: EDDSASignature;
+  let ecdsaSignature: ECDSASignature;
 
   before("setup variables", async () => {
     acirBuffer = Buffer.from(circuit.bytecode, "base64");
@@ -74,29 +84,23 @@ describe("Test claim logic", () => {
       .build();
 
     crypto = await CryptographyPrimitives.getInstance();
-    privateKey = Buffer.alloc(32, 8431);
-    const pubkey = crypto.eddsa.prv2pub(privateKey);
-    publicKey = {
+    eddsaPrivateKey = Buffer.alloc(32, 8431);
+    const pubkey = crypto.eddsa.prv2pub(eddsaPrivateKey);
+    eddsaPublicKey = {
       X: crypto.bn128ScalarField.toObject(pubkey[0]),
       Y: crypto.bn128ScalarField.toObject(pubkey[1]),
     };
+
+    ecdsaPrivateKey = Buffer.alloc(32, 8432);
+    ecdsaPublicKey = getECDSAPublicKeyLEFromPrivateKey(ecdsaPrivateKey);
+
+    eddsaSignature = await claim.eddsaSign(eddsaPrivateKey);
+    ecdsaSignature = await claim.ecdsaSign(ecdsaPrivateKey);
   });
 
   it("the valid witness should pass the circuit test", async () => {
-    /*
-    claim: [Field; 8], 
-    expected_schema: Field, 
-    valid_until: Field, 
-    expected_sequel: Field, 
-    expected_subject: Field,
-    public_key_x: Field,
-    public_key_y: Field,
-    signature_s: Field,
-    signature_r8_x: Field,
-    signature_r8_y: Field  
-    */
     const validUntil = BigInt(Date.now() + 30 * 60 * 1000);
-    const signature = await claim.eddsaSign(privateKey);
+
     const witness = new Map<number, string>();
 
     const inputs = [
@@ -105,16 +109,21 @@ describe("Test claim logic", () => {
       validUntil,
       sequel,
       subject,
-      publicKey.X,
-      publicKey.Y,
-      signature.s,
-      signature.r8x,
-      signature.r8y,
+      eddsaPublicKey.X,
+      eddsaPublicKey.Y,
+      eddsaSignature.S,
+      eddsaSignature.R8X,
+      eddsaSignature.R8Y,
+      ...ecdsaPublicKey.X,
+      ...ecdsaPublicKey.Y,
+      ...ecdsaSignature,
     ];
 
     inputs.forEach((input, index) => {
       witness.set(index + 1, convertToHexAndPad(input));
     });
+
+    console.log(witness);
 
     const witnessMap = await executeCircuit(acirBuffer, witness, () => {
       throw Error("unexpected oracle");
@@ -136,20 +145,8 @@ describe("Test claim logic", () => {
   });
 
   it("the witness of an expired claim mustn't pass the circuit test", async () => {
-    /*
-    claim: [Field; 8], 
-    expected_schema: Field, 
-    valid_until: Field, 
-    expected_sequel: Field, 
-    expected_subject: Field,
-    public_key_x: Field,
-    public_key_y: Field,
-    signature_s: Field,
-    signature_r8_x: Field,
-    signature_r8_y: Field  
-    */
     const validUntil = BigInt(Date.now() + 80 * 60 * 1000);
-    const signature = await claim.eddsaSign(privateKey);
+
     const witness = new Map<number, string>();
 
     const inputs = [
@@ -158,11 +155,14 @@ describe("Test claim logic", () => {
       validUntil,
       sequel,
       subject,
-      publicKey.X,
-      publicKey.Y,
-      signature.s,
-      signature.r8x,
-      signature.r8y,
+      eddsaPublicKey.X,
+      eddsaPublicKey.Y,
+      eddsaSignature.S,
+      eddsaSignature.R8X,
+      eddsaSignature.R8Y,
+      ...ecdsaPublicKey.X,
+      ...ecdsaPublicKey.Y,
+      ...ecdsaSignature,
     ];
 
     inputs.forEach((input, index) => {
@@ -193,7 +193,7 @@ describe("Test claim logic", () => {
     let wrongClaim = claim.clone();
     wrongClaim.schemaHash = wrongSchemaHash;
     const validUntil = BigInt(Date.now() + 30 * 60 * 1000);
-    const signature = await claim.eddsaSign(privateKey);
+
     const witness = new Map<number, string>();
 
     const inputs = [
@@ -202,11 +202,14 @@ describe("Test claim logic", () => {
       validUntil,
       sequel,
       subject,
-      publicKey.X,
-      publicKey.Y,
-      signature.s,
-      signature.r8x,
-      signature.r8y,
+      eddsaPublicKey.X,
+      eddsaPublicKey.Y,
+      eddsaSignature.S,
+      eddsaSignature.R8X,
+      eddsaSignature.R8Y,
+      ...ecdsaPublicKey.X,
+      ...ecdsaPublicKey.Y,
+      ...ecdsaSignature,
     ];
 
     inputs.forEach((input, index) => {
@@ -228,7 +231,7 @@ describe("Test claim logic", () => {
     let wrongClaim = claim.clone();
     wrongClaim.subject = wrongSubject;
     const validUntil = BigInt(Date.now() + 30 * 60 * 1000);
-    const signature = await claim.eddsaSign(privateKey);
+
     const witness = new Map<number, string>();
 
     const inputs = [
@@ -237,11 +240,14 @@ describe("Test claim logic", () => {
       validUntil,
       sequel,
       subject,
-      publicKey.X,
-      publicKey.Y,
-      signature.s,
-      signature.r8x,
-      signature.r8y,
+      eddsaPublicKey.X,
+      eddsaPublicKey.Y,
+      eddsaSignature.S,
+      eddsaSignature.R8X,
+      eddsaSignature.R8Y,
+      ...ecdsaPublicKey.X,
+      ...ecdsaPublicKey.Y,
+      ...ecdsaSignature,
     ];
 
     inputs.forEach((input, index) => {
@@ -263,7 +269,7 @@ describe("Test claim logic", () => {
     let wrongClaim = claim.clone();
     wrongClaim.subject = wrongSequel;
     const validUntil = BigInt(Date.now() + 30 * 60 * 1000);
-    const signature = await claim.eddsaSign(privateKey);
+
     const witness = new Map<number, string>();
 
     const inputs = [
@@ -272,11 +278,14 @@ describe("Test claim logic", () => {
       validUntil,
       sequel,
       subject,
-      publicKey.X,
-      publicKey.Y,
-      signature.s,
-      signature.r8x,
-      signature.r8y,
+      eddsaPublicKey.X,
+      eddsaPublicKey.Y,
+      eddsaSignature.S,
+      eddsaSignature.R8X,
+      eddsaSignature.R8Y,
+      ...ecdsaPublicKey.X,
+      ...ecdsaPublicKey.Y,
+      ...ecdsaSignature,
     ];
 
     inputs.forEach((input, index) => {

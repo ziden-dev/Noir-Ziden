@@ -2,7 +2,7 @@ use dep::std;
 mod utils;
 mod indexed_merkle_tree;
 
-fn verifyEDDSA<N>(public_key_x: Field,
+fn eddsa_ownership_verify<N>(public_key_x: Field,
             public_key_y: Field,
             auth_path: [Field; N],
             auth_index: Field,
@@ -17,7 +17,8 @@ fn verifyEDDSA<N>(public_key_x: Field,
     assert(auth_root == state);
 }
 
-fn verifyECDSA<N>(public_key_x: [u8;32],
+fn ecdsa_ownership_verify<N>(
+            public_key_x: [u8;32],
             public_key_y: [u8;32],
             auth_path: [Field; N],
             auth_index: Field,

@@ -1,143 +1,145 @@
 import { expect } from "chai";
-import { buildPoseidon } from "./crypto/poseidon_wasm.js"
+import { buildPoseidon } from "./crypto/poseidon_wasm.js";
 import { IndexedMerkleTree } from "./tree/indexedMerkleTree.js";
 import { Holder } from "./state/state.js";
-import { getECDSAPublicKeyFromPrivateKey, idOwnershipByECDSASignature } from "./witness/authen.js";
+import {
+  getECDSAPublicKeyFromPrivateKey,
+  idOwnershipByECDSASignature,
+} from "./utils/keys.js";
 import { prove_and_verify } from "./utils/runCircuit.js";
 
 describe("test", () => {
-    let poseidon: any;
-    before(async () => {
-        poseidon = await buildPoseidon();
-    })
+  let poseidon: any;
+  before(async () => {
+    poseidon = await buildPoseidon();
+  });
 
-    it("poseidon", async () => {
-        const res = poseidon([1, 2]);
-        expect(poseidon.F.toString(res)).equal(BigInt("0x115cc0f5e7d690413df64c6b9662e9cf2a3617f2743245519e19607a4417189a").toString(10));
-    })
+  it("poseidon", async () => {
+    const res = poseidon([1, 2]);
+    expect(poseidon.F.toString(res)).equal(
+      BigInt(
+        "0x115cc0f5e7d690413df64c6b9662e9cf2a3617f2743245519e19607a4417189a"
+      ).toString(10)
+    );
+  });
 
-    it("js insert tree", async () => {
+  it("js insert tree", async () => {
+    //   root
+    //    /\
+    //   a  zero[2]
+    //  /  \
+    // b    c
+    // /\   /\
+    //0  3 1  zero[0]
+    //1  0 3
+    //2  0 1
 
-        //   root
-        //    /\
-        //   a  zero[2]
-        //  /  \    
-        // b    c
-        // /\   /\
-        //0  3 1  zero[0]
-        //1  0 3
-        //2  0 1
+    var tree = new IndexedMerkleTree(3, poseidon);
 
-        var tree = new IndexedMerkleTree(3, poseidon);
+    tree.insert(3n);
+    tree.insert(1n);
 
-        tree.insert(3n);
-        tree.insert(1n);
+    var leaf1 = tree.hash([0n, 1n, 2n]);
+    var leaf2 = tree.hash([3n, 0n, 0n]);
+    var leaf3 = tree.hash([1n, 3n, 1n]);
 
+    var c = tree.hash([leaf3, tree.zero[0]]);
+    var b = tree.hash([leaf1, leaf2]);
+    var a = tree.hash([b, c]);
+    var root = tree.hash([a, tree.zero[2]]);
 
-        var leaf1 = tree.hash([0n, 1n, 2n]);
-        var leaf2 = tree.hash([3n, 0n, 0n]);
-        var leaf3 = tree.hash([1n, 3n, 1n]);
+    expect(root).equal(tree.getRoot());
 
-        var c = tree.hash([leaf3, tree.zero[0]]);
-        var b = tree.hash([leaf1, leaf2]);
-        var a = tree.hash([b, c]);
-        var root = tree.hash([a, tree.zero[2]]);
+    /// check path
+    var res = tree.getPathProofLow(1n);
+    if (res != null) {
+      var { leafLow: leaf, pathLow: path } = res;
+      var leaf4 = tree.hash([leaf.val, leaf.nextVal, BigInt(leaf.nextIdx)]);
+      var c2 = tree.hash([leaf4, path[0]]);
+      var a2 = tree.hash([path[1], c2]);
+      var root2 = tree.hash([a2, path[2]]);
 
-        expect(root).equal(tree.getRoot());
+      expect(root).equal(root2);
+    }
+  });
 
-        /// check path
-        var res = tree.getPathProofLow(1n);
-        if (res != null) {
-            var { leafLow: leaf, pathLow: path } = res;
-            var leaf4 = tree.hash([leaf.val, leaf.nextVal, BigInt(leaf.nextIdx)]);
-            var c2 = tree.hash([leaf4, path[0]]);
-            var a2 = tree.hash([path[1], c2]);
-            var root2 = tree.hash([a2, path[2]]);
+  // it("circuit insert tree", async () => {
 
-            expect(root).equal(root2);
-        }
+  //     //   root
+  //     //    /\
+  //     //   a  zero[2]
+  //     //  /  \
+  //     // b    c
+  //     // /\   /\
+  //     //0  3 1  zero[0]
+  //     //1  0 3
+  //     //2  0 1
 
-    })
+  //     var tree = new IndexedMerkleTree(3, poseidon);
 
-    // it("circuit insert tree", async () => {
+  //     tree.insert(3n);
+  //     var input = tree.insert(1n);
 
-    //     //   root
-    //     //    /\
-    //     //   a  zero[2]
-    //     //  /  \    
-    //     // b    c
-    //     // /\   /\
-    //     //0  3 1  zero[0]
-    //     //1  0 3
-    //     //2  0 1
+  //     if (input != null) prove_and_verify(input);
 
-    //     var tree = new IndexedMerkleTree(3, poseidon);
+  // })
 
-    //     tree.insert(3n);
-    //     var input = tree.insert(1n);
+  it("circuit id ownership by signature", async () => {
+    var privateKey1 = Buffer.alloc(32, 1);
+    var privateKey2 = Buffer.alloc(32, 2);
+    var privateKey3 = Buffer.alloc(32, 3);
 
-    //     if (input != null) prove_and_verify(input);
+    var pubkey1 = getECDSAPublicKeyFromPrivateKey(privateKey1);
+    var pubkey2 = getECDSAPublicKeyFromPrivateKey(privateKey2);
+    var pubkey3 = getECDSAPublicKeyFromPrivateKey(privateKey3);
 
-    // })
+    var holder = new Holder(3, poseidon);
+    holder.addAuth(pubkey1.X.valueOf(), pubkey1.Y.valueOf());
+    holder.addAuth(pubkey2.X.valueOf(), pubkey2.Y.valueOf());
+    holder.addAuth(pubkey3.X.valueOf(), pubkey3.Y.valueOf());
 
-    it("circuit id ownership by signature", async () => {
+    holder.revokeAuth(pubkey1.X.valueOf());
+    holder.revokeAuth(pubkey2.X.valueOf());
 
-        var privateKey1 = Buffer.alloc(32, 1);
-        var privateKey2 = Buffer.alloc(32, 2);
-        var privateKey3 = Buffer.alloc(32, 3);
+    const challenge = Buffer.alloc(32, 4);
 
-        var pubkey1 = await getECDSAPublicKeyFromPrivateKey(privateKey1);
-        var pubkey2 = await getECDSAPublicKeyFromPrivateKey(privateKey2);
-        var pubkey3 = await getECDSAPublicKeyFromPrivateKey(privateKey3);
+    var input = await idOwnershipByECDSASignature(
+      privateKey3,
+      holder,
+      challenge
+    );
 
-        var holder = new Holder(3, poseidon);
-        holder.addAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
-        holder.addAuth(pubkey2.publicKeyX, pubkey2.publicKeyY);
-        holder.addAuth(pubkey3.publicKeyX, pubkey3.publicKeyY);
+    if (input != null) prove_and_verify(input);
+  });
 
-        holder.revokeAuth(pubkey1.publicKeyX);
-        holder.revokeAuth(pubkey2.publicKeyX);
+  // it("circuit id ownership by signature", async () => {
 
-        const challenge = Buffer.alloc(32, 4);
+  //     const messageHash = Buffer.alloc(32, 2);
+  //     const prvKey = Buffer.alloc(32, 1);
 
-        var input = await idOwnershipByECDSASignature(privateKey3, holder, challenge);
+  //     // const messageHash = Buffer.from(sha256(message).slice(2), "hex");
 
+  //     const pubKey = publicKeyCreate(prvKey, false);
 
-        if (input != null) prove_and_verify(input);
-    })
+  //     const pubKeyX = pubKey.slice(1, 33);
+  //     const pubKeyY = pubKey.slice(33, 65);
 
-    // it("circuit id ownership by signature", async () => {
+  //     const ret = ecdsaSign(messageHash, prvKey);
 
-    //     const messageHash = Buffer.alloc(32, 2);
-    //     const prvKey = Buffer.alloc(32, 1);
+  //     // console.log(messageHash);
 
-    //     // const messageHash = Buffer.from(sha256(message).slice(2), "hex");
+  //     // console.log(pubKeyX, pubKeyY);
 
-    //     const pubKey = publicKeyCreate(prvKey, false);
+  //     // console.log(ret);
 
-    //     const pubKeyX = pubKey.slice(1, 33);
-    //     const pubKeyY = pubKey.slice(33, 65);
+  //     var input = {
+  //         _public_key_x: Array.from(pubKeyX),
+  //         _public_key_y: Array.from(pubKeyY),
+  //         _signature: Array.from(ret.signature),
+  //         _message_hash: messageHash
+  //     }
 
-    //     const ret = ecdsaSign(messageHash, prvKey);
-
-    //     // console.log(messageHash);
-
-    //     // console.log(pubKeyX, pubKeyY);
-
-    //     // console.log(ret);
-
-    //     var input = {
-    //         _public_key_x: Array.from(pubKeyX),
-    //         _public_key_y: Array.from(pubKeyY),
-    //         _signature: Array.from(ret.signature),
-    //         _message_hash: messageHash
-    //     }
-
-    //     prove_and_verify(input);
-    //     // const recovered = ecdsaRecover(ret.signature, ret.recid, message);
-    // })
-})
-
-
-
-
+  //     prove_and_verify(input);
+  //     // const recovered = ecdsaRecover(ret.signature, ret.recid, message);
+  // })
+});
