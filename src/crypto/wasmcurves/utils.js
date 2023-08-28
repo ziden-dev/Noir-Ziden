@@ -47,13 +47,20 @@ export function uint8ArrayToBigInt(uint8Array) {
     return result;
 }
 
-export function bigInt2Buffer(x) {
-    return Buffer.from(x.toString(16), 'hex');
+export function bigInt2Uint8Array(value, length) {
+    const hexString = value.toString(16);
+    if (hexString.length > length * 2) {
+        return new Uint8Array(length);
+    }
+    const paddedHexString = hexString.padStart(length * 2, '0');
+    const byteArray = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+        byteArray[length - i - 1] = parseInt(paddedHexString.substr(i * 2, 2), 16);
+    }
+    return byteArray;
 }
 
-export function buffer2BigInt(x) {
-    return BigInt("0x" + x.toString('hex'));
-}
+
 
 export const isOcamNum = function (a) {
     if (!Array.isArray(a)) return false;

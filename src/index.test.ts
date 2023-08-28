@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { buildPoseidon } from "./crypto/poseidon_wasm.js"
 import { IndexedMerkleTree } from "./tree/indexedMerkleTree.js";
 import { Holder } from "./state/state.js";
-import { getECDSAPublicKeyFromPrivateKey, idOwnershipByECDSASignature } from "./witness/authen.js";
+import { getEDDSAPublicKeyFromPrivateKey, stateTransitionByEDDSASignature } from "./witness/authen.js";
 import { prove_and_verify } from "./utils/runCircuit.js";
 
 describe("test", () => {
@@ -82,26 +82,26 @@ describe("test", () => {
 
     it("circuit id ownership by signature", async () => {
 
-        var privateKey1 = Buffer.alloc(32, 1);
-        var privateKey2 = Buffer.alloc(32, 2);
-        var privateKey3 = Buffer.alloc(32, 3);
+        var privateKey1 = BigInt("123");
+        var privateKey2 = BigInt("12");
+        var privateKey3 = BigInt("34");
 
-        var pubkey1 = await getECDSAPublicKeyFromPrivateKey(privateKey1);
-        var pubkey2 = await getECDSAPublicKeyFromPrivateKey(privateKey2);
-        var pubkey3 = await getECDSAPublicKeyFromPrivateKey(privateKey3);
+        var pubkey1 = await getEDDSAPublicKeyFromPrivateKey(privateKey1);
+        var pubkey2 = await getEDDSAPublicKeyFromPrivateKey(privateKey2);
+        var pubkey3 = await getEDDSAPublicKeyFromPrivateKey(privateKey3);
 
         var holder = new Holder(3, poseidon);
         holder.addAuth(pubkey1.publicKeyX, pubkey1.publicKeyY);
-        holder.addAuth(pubkey2.publicKeyX, pubkey2.publicKeyY);
-        holder.addAuth(pubkey3.publicKeyX, pubkey3.publicKeyY);
 
-        holder.revokeAuth(pubkey1.publicKeyX);
-        holder.revokeAuth(pubkey2.publicKeyX);
-
-        const challenge = Buffer.alloc(32, 4);
-
-        var input = await idOwnershipByECDSASignature(privateKey3, holder, challenge);
-
+        var input = await stateTransitionByEDDSASignature(
+            privateKey1,
+            holder,
+            [
+                { type: "addAuthOperation", ...pubkey2 },
+                { type: "addAuthOperation", ...pubkey3 },
+                { type: "revokeAuthOperation", ...pubkey3 },
+            ]
+        )
 
         if (input != null) prove_and_verify(input);
     })

@@ -24,8 +24,8 @@ export class ClaimMerkleTree extends MerkleTree {
         this.leaves.push(zeroLeaf);
     }
 
-    insert(leaf: ClaimLeaf) {
-        this.leaves.push(leaf);
+    insert(slot: bigint[]) {
+        this.leaves.push(new ClaimLeaf(slot));
         this.update(this.leaves.length - 1);
         return this.leaves.length - 1;
     }
