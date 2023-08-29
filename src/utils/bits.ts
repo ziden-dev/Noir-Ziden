@@ -91,3 +91,12 @@ export function bigInt2Uint8Array(value: BigInt, length: number) {
   }
   return byteArray;
 }
+
+export function object2Array(object: any) {
+  var res: any[] = [];
+  for (const [_key, value] of Object.entries(object)) {
+    if (Array.isArray(value)) res = res.concat(...value);
+    else res.push(value);
+  }
+  return res;
+}

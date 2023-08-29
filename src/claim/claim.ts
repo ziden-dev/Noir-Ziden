@@ -1,6 +1,6 @@
 import { ECDSASignature, EDDSASignature } from "src/index.js";
 import { CryptographyPrimitives } from "../crypto/index.js";
-import { bitsToNum, numToBits, bigInt2Uint8Array } from "../utils/bits.js";
+import { bitsToNum, numToBits } from "../utils/bits.js";
 import { signECDSAChallenge } from "../utils/keys.js";
 
 export default class Claim {
@@ -60,7 +60,7 @@ export default class Claim {
 
   async ecdsaSign(privateKey: Buffer): Promise<ECDSASignature> {
     const claimHash = await this.claimHash();
-    const msg = bigInt2Uint8Array(claimHash, 32);
+    const msg = numToBits(claimHash, 32);
     return signECDSAChallenge(privateKey, msg);
   }
 
