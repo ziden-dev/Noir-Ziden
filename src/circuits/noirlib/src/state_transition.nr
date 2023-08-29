@@ -2,8 +2,8 @@ use dep::std;
 mod id_ownership_by_signature;
 
 fn eddsa_state_verify<N>(
-            public_key_x: [u8;32],
-            public_key_y: [u8;32],
+            public_key_x: Field,
+            public_key_y: Field,
             auth_path: [Field; N],
             auth_index: Field,
             claim_root: Field,

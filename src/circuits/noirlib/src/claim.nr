@@ -80,6 +80,18 @@ fn query_single_value(claim: [Field; 8], slot_index: u8, attesting_value: Field,
     }
 }
 
+fn query_double_values(claim: [Field; 8], slot_index_0: u8, slot_index_1: u8, operator: u8){
+    let value_0 = claim[slot_index_0];
+    let value_1 = claim[slot_index_1];
+    if(operator == 0){
+        assert(value_0 == value_1);
+    }else if(operator == 1){
+        assert(utils::less_than(value_0, value_1) == true);
+    }else if(operator == 2){
+        assert(utils::less_than(value_1, value_0) == true);
+    }
+}
+
 fn verify_membership<N>(claim: [Field; 8], slot_index: u8, root: Field, index: Field, merkle_proof: [Field; N]){
     let value = claim[slot_index];
     let expected_root = utils::cal_root_from_mtp(merkle_proof, value, index);

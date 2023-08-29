@@ -1,0 +1,8 @@
+[package]
+name = "eddsa_claim_presentation"
+type = "bin"
+authors = [""]
+compiler_version = "0.10.3"
+
+[dependencies]
+noirlib={path = "../noirlib"}
