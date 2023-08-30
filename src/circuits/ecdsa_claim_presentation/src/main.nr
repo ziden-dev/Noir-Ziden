@@ -14,7 +14,7 @@ fn main(
     challenge: Field,
     
     // Claim existence proof - CEP
-    cep_claim_merkle_path: [Field; 32], 
+    cep_claim_merkle_path: [Field; 10], 
     cep_claim_index: Field, 
     cep_claim_root: Field,
     cep_auth_root: Field,
@@ -22,7 +22,7 @@ fn main(
     cep_issuer_state: Field,
 
     // Claim non-revocation proof - CNP
-    cnp_path_low: [Field; 32], 
+    cnp_path_low: [Field; 10], 
     cnp_val_low: Field, 
     cnp_next_val: Field, 
     cnp_next_idx: Field, 

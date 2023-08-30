@@ -7,19 +7,19 @@ export interface IssueClaimOperation extends StateTransitionOperation {
 
 export interface RevokeClaimOperation extends StateTransitionOperation {
     type: "revokeClaim",
-    claimHash: bigint
+    claimHash: BigInt
 }
 
 export interface AddAuthOperation extends StateTransitionOperation {
     type: "addAuth",
-    publicKeyX: bigint,
-    publicKeyY: bigint,
+    publicKeyX: BigInt,
+    publicKeyY: BigInt,
     publicKeyType: PublicKeyType
 }
 
 export interface RevokeAuthOperation extends StateTransitionOperation {
     type: "revokeAuth",
-    publicKeyX: bigint
+    publicKeyX: BigInt
 }
 
 export interface StateTransitionOperation {

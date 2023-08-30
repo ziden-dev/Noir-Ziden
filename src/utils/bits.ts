@@ -68,7 +68,7 @@ export function bigInt2BytesLE(_a: any, len: number) {
   return b;
 }
 
-export function uint8ArrayToBigInt(uint8Array: Uint8Array) {
+export function uint8ArrayToBigInt(uint8Array: Uint8Array): BigInt {
   let result = 0n;
   let mul2 = 1n;
   for (let i = 0; i < uint8Array.length; i++) {
@@ -99,4 +99,29 @@ export function object2Array(object: any) {
     else res.push(value);
   }
   return res;
+}
+
+export function flattenObject(obj: any): any[] {
+  const result: any[] = [];
+
+  function traverse(innerObj: any): void {
+    for (const key in innerObj) {
+      if (innerObj.hasOwnProperty(key)) {
+        const value = innerObj[key];
+
+        if (typeof value === 'object') {
+          if (Array.isArray(value)) {
+            result.push(...value);
+          } else {
+            traverse(value);
+          }
+        } else {
+          result.push(value);
+        }
+      }
+    }
+  }
+
+  traverse(obj);
+  return result;
 }

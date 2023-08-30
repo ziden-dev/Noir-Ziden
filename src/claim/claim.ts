@@ -41,22 +41,22 @@ export default class Claim {
     const crypto = await CryptographyPrimitives.getInstance();
     return crypto.poseidon(this.slots.map((e) => bitsToNum(e)));
   }
-  async claimHash(): Promise<bigint> {
+  async claimHash(): Promise<BigInt> {
     const binaryHash = await this._claimBinaryHash();
     const crypto = await CryptographyPrimitives.getInstance();
     return crypto.bn128ScalarField.toObject(binaryHash);
   }
 
-  claimHashCustom(hash: Function): bigint {
+  claimHashCustom(hash: Function): BigInt {
     return hash(this.slots.map((e) => bitsToNum(e)));
   }
 
-  async eddsaSign(privateKey: bigint): Promise<EDDSASignature> {
+  async eddsaSign(privateKey: BigInt): Promise<EDDSASignature> {
     const msg = await this._claimBinaryHash();
     return signEDDSAChallenge(privateKey, msg);
   }
 
-  async ecdsaSign(privateKey: bigint): Promise<ECDSASignature> {
+  async ecdsaSign(privateKey: BigInt): Promise<ECDSASignature> {
     const claimHash = await this.claimHash();
     return signECDSAChallenge(privateKey, claimHash);
   }
