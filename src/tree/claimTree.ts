@@ -1,15 +1,15 @@
+import Claim from "../claim/claim.js";
 import { Leaf, MerkleTree } from "./merkleTree.js";
 
 class ClaimLeaf implements Leaf {
-    public slot: bigint[];
+    public claim: Claim;
 
-    constructor(slot: bigint[]) {
-        if (slot.length == 8) this.slot = slot;
-        else this.slot = new Array(8).fill(0n);
+    constructor(claim: Claim) {
+        this.claim = claim;
     }
 
     toNode(hash: Function) {
-        return hash(this.slot);
+        return this.claim.claimHashCustom(hash);
     };
 
 }
@@ -18,15 +18,8 @@ export class ClaimMerkleTree extends MerkleTree {
 
     public leaves: ClaimLeaf[] = [];
 
-    constructor(n: number, hasher: any) {
-
-        var zeroLeaf = new ClaimLeaf(new Array(8).fill(0n));
-        super(n, hasher, zeroLeaf);
-        this.leaves.push(zeroLeaf);
-    }
-
-    insert(slot: bigint[]) {
-        this.leaves.push(new ClaimLeaf(slot));
+    insert(claim: Claim) {
+        this.leaves.push(new ClaimLeaf(claim));
         this.update(this.leaves.length - 1);
         return this.leaves.length - 1;
     }

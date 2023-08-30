@@ -22,9 +22,11 @@ export class IndexedMerkleTree extends MerkleTree {
     public leaves: IndexedLeaf[] = [];
 
     constructor(n: number, hasher: any) {
-        var zeroLeaf = new IndexedLeaf(0n, 0n, 0);
-        super(n, hasher, zeroLeaf);
-        this.leaves.push(zeroLeaf);
+        var initlalLeaf = new IndexedLeaf(0n, 0n, 0);
+        super(n, hasher);
+        // insert initlal leaf
+        this.leaves.push(initlalLeaf);
+        this.update(0);
     }
 
     getLeafLow(value: bigint) {
@@ -75,110 +77,17 @@ export class IndexedMerkleTree extends MerkleTree {
 
         // return input circuit
         return {
-            path_low: pathLow,
-            root_old: rootOld,
-            index_low: idxLow,
-            val_low: leafLow.val,
-            next_val_low: leafNew.nextVal,
-            next_idx_low: leafNew.nextIdx,
+            rootOld,
+            rootNew,
+            pathLow,
+            idxLow,
+            valLow: leafLow.val,
+            nextValLow: leafNew.nextVal,
+            nextIdxLow: leafNew.nextIdx,
             val: value,
             index: idxNew,
-            path_new: pathNew,
-            root_new: rootNew
+            pathNew
         }
     }
 
-    // insert_batch(m, values) {
-    //     values.sort();
-    //     var idxNew = this.leaves.length;
-    //     var p = values.length;
-
-    //     if (idxNew % p != 0 || (1 << m) != p) {
-    //         return;
-    //     }
-
-    //     var pathLow = [];
-    //     var idxLow = [];
-    //     var valLow = [];
-    //     var nextValLow = [];
-    //     var nextIdxLow = [];
-
-    //     var valNew = [];
-    //     var nextValNew = [];
-    //     var nextIdxNew = [];
-    //     var rootOld = this.getRoot();
-    //     // insert to pending subtree
-
-    //     for (var i = 0; i < p; i++) {
-    //         var value = values[i];
-    //         var { idxLow: curIndexLow, leafLow } = this.getLeafLow(value);
-    //         if (leafLow.val == value) return;
-    //         ///
-    //         var { path } = this.getPath(leafLow.val);
-    //         idxLow.push(curIndexLow);
-    //         pathLow.push(path);
-    //         valLow.push(leafLow.val);
-    //         nextValLow.push(leafLow.nextVal);
-    //         nextIdxLow.push(leafLow.nextIdx);
-    //         ///
-    //         var leafNew = { val: value, nextVal: leafLow.nextVal, nextIdx: leafLow.nextIdx };
-    //         leafLow.nextVal = value;
-    //         leafLow.nextIdx = this.leaves.length;
-    //         this.leaves.push(leafNew);
-    //         if (curIndexLow < idxNew) this.update(curIndexLow);
-
-    //         valNew.push(leafNew.val);
-
-    //     }
-
-    //     for (var i = 0; i < p; i++) {
-    //         var leaf = this.leaves[i + idxNew];
-
-    //         nextValNew.push(leaf.nextVal);
-    //         nextIdxNew.push(leaf.nextIdx);
-    //     }
-
-    //     // insert subtree
-
-    //     //      get path
-
-    //     var index = this.trueIndex(idxNew) >> m;
-
-
-    //     var pathNew = [];
-    //     while (index > 1) {
-    //         pathNew.push(this.sibling(index));
-    //         index = this.parentIndex(index);
-    //     }
-
-
-
-    //     //    insert subtree
-    //     for (var i = 0; i < p; i++) {
-    //         this.update(idxNew + i);
-    //     }
-
-    //     index = this.trueIndex(idxNew) >> m;
-
-
-
-    //     var rootNew = this.getRoot();
-    //     return {
-    //         pathLow,
-    //         rootOld,
-    //         indexLow: idxLow,
-    //         valLow,
-    //         nextValLow,
-    //         nextIdxLow,
-
-    //         rootOld,
-    //         rootNew,
-
-    //         indexNew: idxNew,
-    //         pathNew,
-    //         valNew,
-    //         nextValNew,
-    //         nextIdxNew
-    //     }
-    // }
 }

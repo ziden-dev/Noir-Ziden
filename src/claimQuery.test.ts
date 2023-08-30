@@ -1,9 +1,9 @@
 import { expect } from "chai";
-import { Issuer } from "./state/state.js";
+import { Holder, Issuer } from "./state/state.js";
 import {
     getECDSAPublicKeyFromPrivateKey,
     getEDDSAPublicKeyFromPrivateKey,
-    stateTransitionByEDDSASignature
+    idOwnershipByECDSASignature,
 } from "./utils/keys.js";
 import {
     Crs,
@@ -15,8 +15,10 @@ import circuit from "./circuits/state/target/state.json" assert { type: "json" }
 import { decompressSync } from "fflate";
 import { convertToHexAndPad, object2Array } from "./utils/bits.js";
 import { CryptographyPrimitives } from "./crypto/index.js";
-import { AddAuthOperation, IssueClaimOperation, PublicKeyType, RevokeAuthOperation, RevokeClaimOperation } from "./utils/type.js";
+import { PublicKeyType } from "./utils/type.js";
 import ClaimBuilder from "./claim/claim-builder.js";
+import Claim from "./claim/claim.js";
+import { ECDSAPublicKey, EDDSAPublicKey } from "./index.js";
 
 describe("test", () => {
     let poseidon: any;
@@ -25,6 +27,24 @@ describe("test", () => {
     let api: any;
     let acirComposer: any;
     let crypto: CryptographyPrimitives;
+
+    let claim: Claim;
+
+    let schemaHash: BigInt;
+    let expirationTime: BigInt;
+    let sequel: BigInt;
+    let slotValues: BigInt[];
+    let subject: BigInt;
+
+    let privateKey1: bigint;
+    let privateKey2: bigint;
+    let privateKey3: bigint;
+    let pubkey1: EDDSAPublicKey;
+    let pubkey2: ECDSAPublicKey;
+    let pubkey3: ECDSAPublicKey;
+    let issuer: Issuer;
+    let holder: Holder;
+    let challenge: bigint;
 
     before(async () => {
         crypto = await CryptographyPrimitives.getInstance();
@@ -45,26 +65,27 @@ describe("test", () => {
         );
 
         acirComposer = await api.acirNewAcirComposer(subgroupSize);
-    });
 
+        privateKey1 = BigInt("123");
+        privateKey2 = BigInt("12");
+        privateKey3 = BigInt("12");
 
-    it("circuit state transition", async () => {
-        var privateKey1 = BigInt("123");
-        var privateKey2 = BigInt("12");
-        var privateKey3 = BigInt("34");
+        pubkey1 = await getEDDSAPublicKeyFromPrivateKey(privateKey1);
+        pubkey2 = getECDSAPublicKeyFromPrivateKey(privateKey2);
+        pubkey3 = getECDSAPublicKeyFromPrivateKey(privateKey3);
 
-        var pubkey1 = await getEDDSAPublicKeyFromPrivateKey(privateKey1);
-        var pubkey2 = await getEDDSAPublicKeyFromPrivateKey(privateKey2);
-        var pubkey3 = getECDSAPublicKeyFromPrivateKey(privateKey3);
+        holder = new Holder(8, poseidon);
+        holder.addAuth(pubkey1.X as bigint, pubkey1.Y as bigint, PublicKeyType.EDDSA);
+        holder.addAuth(pubkey2.X as bigint, pubkey2.Y as bigint, PublicKeyType.ECDSA);
 
-        var issuer = new Issuer(3, poseidon);
-        issuer.addAuth(pubkey1.X, pubkey1.Y, PublicKeyType.EDDSA);
+        issuer = new Issuer(8, poseidon);
+        issuer.addAuth(pubkey3.X as bigint, pubkey3.Y as bigint, PublicKeyType.ECDSA)
 
-        var schemaHash = BigInt("93819749189437913473");
-        var expirationTime = BigInt(Date.now() + 60 * 60 * 1000);
-        var sequel = BigInt(1);
-        var subject = BigInt("439798");
-        var slotValues = [
+        schemaHash = BigInt("93819749189437913473");
+        expirationTime = BigInt(Date.now() + 60 * 60 * 1000);
+        sequel = BigInt(1);
+        subject = BigInt("439798");
+        slotValues = [
             BigInt("43818579187414812304"),
             BigInt("43818579187414812305"),
             BigInt("43818579187414812306"),
@@ -72,7 +93,7 @@ describe("test", () => {
             BigInt("43818579187414812308"),
             BigInt("43818579187414812309"),
         ];
-        var claim = new ClaimBuilder()
+        claim = new ClaimBuilder()
             .withSchemaHash(schemaHash)
             .withExpirationTime(expirationTime)
             .withSequel(sequel)
@@ -85,27 +106,18 @@ describe("test", () => {
             .withSlotValue(7, slotValues[5])
             .build();
 
-        var operation1: AddAuthOperation = { type: "addAuth", publicKeyX: pubkey2.X, publicKeyY: pubkey2.Y, publicKeyType: PublicKeyType.EDDSA };
-        var operation2: AddAuthOperation = { type: "addAuth", publicKeyX: pubkey3.X, publicKeyY: pubkey2.Y, publicKeyType: PublicKeyType.ECDSA };
-        var operation3: RevokeAuthOperation = { type: "revokeAuth", publicKeyX: pubkey3.X };
-        var operation4: IssueClaimOperation = { type: "issueClaim", claim };
-        var operation5: RevokeClaimOperation = { type: "revokeClaim", claimHash: await claim.claimHash() }
-        // add pubkey2 and pubkey3 by ecdsa signature
-        var inputs2 = (await stateTransitionByEDDSASignature(
-            privateKey1,
-            issuer,
-            [
-                operation1,
-                operation2,
-                operation3,
-                operation4,
-                operation5
-            ]
-        ));
+        issuer.addClaim(claim);
+        challenge = BigInt("123");
+    });
+
+
+    it("circuit query ecdsa claim ", async () => {
+        var inputsIOP = await idOwnershipByECDSASignature(privateKey1, holder, challenge);
+        var { } = issuer.claimTree.getPathProof(0);
+        var inputs: any[] = [];
 
         const witness = new Map<number, string>();
-        var inputs = object2Array(inputs2);
-        console.log(inputs2);
+
         inputs.forEach((input, index) => {
             witness.set(index + 1, convertToHexAndPad(input));
         });

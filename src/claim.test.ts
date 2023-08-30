@@ -7,7 +7,6 @@ import {
 import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
 import circuit from "./circuits/claim/target/claim.json" assert { type: "json" };
 import { decompressSync } from "fflate";
-import { CryptographyPrimitives } from "./crypto/index.js";
 import {
   ECDSAPublickeyLEBytes,
   ECDSASignature,
@@ -17,7 +16,7 @@ import {
 import { convertToHexAndPad } from "./utils/bits.js";
 import Claim from "./claim/claim.js";
 import ClaimBuilder from "./claim/claim-builder.js";
-import { getECDSAPublicKeyLEFromPrivateKey } from "./utils/keys.js";
+import { getECDSAPublicKeyLEFromPrivateKey, getEDDSAPublicKeyFromPrivateKey } from "./utils/keys.js";
 
 describe("Test claim logic", () => {
   let acirBuffer: any;
@@ -32,10 +31,9 @@ describe("Test claim logic", () => {
   let slotValues: BigInt[];
   let subject: BigInt;
 
-  let crypto: CryptographyPrimitives;
-  let eddsaPrivateKey: Buffer;
+  let eddsaPrivateKey: bigint;
   let eddsaPublicKey: EDDSAPublicKey;
-  let ecdsaPrivateKey: Buffer;
+  let ecdsaPrivateKey: bigint;
   let ecdsaPublicKey: ECDSAPublickeyLEBytes;
   let eddsaSignature: EDDSASignature;
   let ecdsaSignature: ECDSASignature;
@@ -83,15 +81,14 @@ describe("Test claim logic", () => {
       .withSlotValue(7, slotValues[5])
       .build();
 
-    crypto = await CryptographyPrimitives.getInstance();
-    eddsaPrivateKey = Buffer.alloc(32, 8431);
-    const pubkey = crypto.eddsa.prv2pub(eddsaPrivateKey);
+    eddsaPrivateKey = BigInt("1235");
+    const pubkey = await getEDDSAPublicKeyFromPrivateKey(eddsaPrivateKey);
     eddsaPublicKey = {
-      X: crypto.bn128ScalarField.toObject(pubkey[0]),
-      Y: crypto.bn128ScalarField.toObject(pubkey[1]),
+      X: pubkey.X,
+      Y: pubkey.Y
     };
 
-    ecdsaPrivateKey = Buffer.alloc(32, 8432);
+    ecdsaPrivateKey = BigInt("123");
     ecdsaPublicKey = getECDSAPublicKeyLEFromPrivateKey(ecdsaPrivateKey);
 
     eddsaSignature = await claim.eddsaSign(eddsaPrivateKey);
@@ -126,7 +123,7 @@ describe("Test claim logic", () => {
       witness.set(index + 1, convertToHexAndPad(input));
     });
 
-    console.log(witness);
+    //console.log(witness);
 
     const witnessMap = await executeCircuit(acirBuffer, witness, () => {
       throw Error("unexpected oracle");
@@ -175,7 +172,7 @@ describe("Test claim logic", () => {
       witness.set(index + 1, convertToHexAndPad(input));
     });
 
-    console.log(witness);
+    //console.log(witness);
 
     const witnessMap = await executeCircuit(acirBuffer, witness, () => {
       throw Error("unexpected oracle");
@@ -223,6 +220,7 @@ describe("Test claim logic", () => {
     inputs.forEach((input, index) => {
       witness.set(index + 1, convertToHexAndPad(input));
     });
+
 
     const witnessMap = await executeCircuit(acirBuffer, witness, () => {
       throw Error("unexpected oracle");
@@ -276,7 +274,7 @@ describe("Test claim logic", () => {
       witnessMap = await executeCircuit(acirBuffer, witness, () => {
         throw Error("unexpected oracle");
       });
-    } catch (err) {}
+    } catch (err) { }
 
     expect(witnessMap).to.be.undefined;
   });
@@ -316,7 +314,7 @@ describe("Test claim logic", () => {
       witnessMap = await executeCircuit(acirBuffer, witness, () => {
         throw Error("unexpected oracle");
       });
-    } catch (err) {}
+    } catch (err) { }
 
     expect(witnessMap).to.be.undefined;
   });
@@ -357,7 +355,7 @@ describe("Test claim logic", () => {
       witnessMap = await executeCircuit(acirBuffer, witness, () => {
         throw Error("unexpected oracle");
       });
-    } catch (err) {}
+    } catch (err) { }
 
     expect(witnessMap).to.be.undefined;
   });
@@ -398,7 +396,7 @@ describe("Test claim logic", () => {
       witnessMap = await executeCircuit(acirBuffer, witness, () => {
         throw Error("unexpected oracle");
       });
-    } catch (err) {}
+    } catch (err) { }
 
     expect(witnessMap).to.be.undefined;
   });

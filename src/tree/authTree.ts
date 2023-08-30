@@ -1,5 +1,4 @@
 import { PublicKeyType } from "../utils/type.js";
-import { bigInt2BytesLE } from "../crypto/wasmcurves/utils.js";
 import { Leaf, MerkleTree } from "./merkleTree.js";
 
 class AuthLeaf implements Leaf {
@@ -23,12 +22,6 @@ class AuthLeaf implements Leaf {
 export class AuthMerkleTree extends MerkleTree {
 
     public leaves: AuthLeaf[] = [];
-
-    constructor(n: number, hasher: any) {
-        var zeroLeaf = new AuthLeaf(0n, 0n, PublicKeyType.None);
-        super(n, hasher, zeroLeaf);
-        this.leaves.push(zeroLeaf);
-    }
 
     insert(publicKeyX: bigint, publicKeyY: bigint, publicKeyType: PublicKeyType) {
         this.leaves.push(new AuthLeaf(publicKeyX, publicKeyY, publicKeyType));
@@ -62,10 +55,10 @@ export class AuthMerkleTree extends MerkleTree {
         if (publicKeyY == null || authPath == null || authIndex == null) return null;
 
         return {
-            public_key_x: bigInt2BytesLE(publicKeyX, 32),
-            public_key_y: bigInt2BytesLE(publicKeyY, 32),
-            auth_path: authPath,
-            auth_index: authIndex
+            publicKeyX,
+            publicKeyY,
+            authPath,
+            authIndex
         }
     }
 }

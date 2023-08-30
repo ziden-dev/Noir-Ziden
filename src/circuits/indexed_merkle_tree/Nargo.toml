@@ -5,3 +5,4 @@ authors = [""]
 compiler_version = "0.10.3"
 
 [dependencies]
+noirlib={path = "../noirlib"}

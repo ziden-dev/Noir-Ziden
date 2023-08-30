@@ -19,10 +19,7 @@ fn check_eddsa_key_existence<N>(public_key_x: Field, public_key_y: Field, auth_p
 }
 
 fn check_ecdsa_key_existence<N>(public_key_x: [u8; 32], public_key_y: [u8; 32], auth_path: [Field; N], auth_index: Field, auth_root: Field){
-    let (x_hi, x_lo) = utils::from_be_bytes(public_key_x);
-    let (y_hi, y_lo) = utils::from_be_bytes(public_key_y);
-
-    let auth_hash = std::hash::poseidon::bn254::hash_5([x_hi, x_lo, y_hi, y_lo, 3]);
+    let auth_hash = std::hash::poseidon::bn254::hash_3([utils::from_le_bytes(public_key_x), utils::from_le_bytes(public_key_y), 3]);
     let actual_root = utils::cal_root_from_mtp(auth_path, auth_hash, auth_index);
     assert(actual_root == auth_root);
 }

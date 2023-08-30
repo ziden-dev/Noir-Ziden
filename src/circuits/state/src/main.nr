@@ -1,8 +1,8 @@
 use dep::std;
 use dep::noirlib;
 
-fn main(public_key_x: [u8;32],
-            public_key_y: [u8;32],
+fn main(public_key_x: Field,
+            public_key_y: Field,
             auth_path: [Field; 3],
             auth_index: Field,
             claim_root: Field,

@@ -1,7 +1,8 @@
-import { PublicKeyType } from "src/utils/type.js";
+import { PublicKeyType } from "../utils/type.js";
 import { AuthMerkleTree } from "../tree/authTree.js";
 import { ClaimMerkleTree } from "../tree/claimTree.js";
 import { IndexedMerkleTree } from "../tree/indexedMerkleTree.js";
+import Claim from "../claim/claim.js";
 
 export abstract class Entity {
     authTree: AuthMerkleTree;
@@ -34,8 +35,8 @@ export class Holder extends Entity {
     getAuthProof(publicKeyX: bigint) {
         return {
             ...this.authTree.getAuthProof(publicKeyX),
-            claim_root: 0n,
-            revoked_claim_root: 0n,
+            claimRoot: 0n,
+            revokedClaimRoot: 0n,
             state: this.state(),
         };
     }
@@ -59,18 +60,21 @@ export class Issuer extends Entity {
     getAuthProof(publicKeyX: bigint) {
         return {
             ...this.authTree.getAuthProof(publicKeyX),
-            claim_root: this.claimTree.getRoot(),
-            revoked_claim_root: this.revokedClaimTree.getRoot(),
+            claimRoot: this.claimTree.getRoot(),
+            revokedClaimRoot: this.revokedClaimTree.getRoot(),
             state: this.state(),
         };
     }
 
-    addClaim(slot: bigint[]) {
-        this.claimTree.insert(slot);
+    addClaim(claim: Claim) {
+        this.claimTree.insert(claim);
     }
 
     revokeClaim(claimHash: bigint) {
         this.revokedClaimTree.insert(claimHash);
     }
 
+    getClaimProof() {
+
+    }
 }

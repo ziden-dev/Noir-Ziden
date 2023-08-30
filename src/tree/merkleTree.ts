@@ -10,12 +10,12 @@ export class MerkleTree {
     public hasher: any;
     public zero: bigint[];
 
-    constructor(n: number, hasher: any, zeroNodeLeaf: Leaf) {
+    constructor(n: number, hasher: any) {
         this.height = n;
         this.hasher = hasher;
         this.zero = new Array(n + 1);
         this.hash = this.hash.bind(this);
-        this.zero[0] = zeroNodeLeaf.toNode(this.hash);
+        this.zero[0] = 0n;
 
         for (var i = 1; i <= this.height; i++) {
             this.zero[i] = this.hash([this.zero[i - 1], this.zero[i - 1]]);

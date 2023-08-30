@@ -1,11 +1,19 @@
-fn main(x : Field, y : pub Field) {
-    assert(x != y);
-}
 
-#[test]
-fn test_main() {
-    main(1, 2);
+use dep::std;
+use dep::noirlib;
 
-    // Uncomment to make test fail
-    // main(1, 1);
+fn main(root_old: Field, root_new: Field, path_low: [Field; 3], index_low: Field, val_low: Field, next_val_low: Field, 
+            next_idx_low:Field, val: Field, index: Field, path_new:[Field;3]) {    
+        noirlib::indexed_merkle_tree::insert(
+            root_old,
+            root_new,
+            path_low,
+            index_low,
+            val_low,
+            next_val_low,
+            next_idx_low,
+            val, 
+            index,
+            path_new
+        );
 }

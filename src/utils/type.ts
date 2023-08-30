@@ -1,6 +1,8 @@
+import Claim from "../claim/claim.js"
+
 export interface IssueClaimOperation extends StateTransitionOperation {
     type: "issueClaim",
-    slot: bigint[]
+    claim: Claim
 }
 
 export interface RevokeClaimOperation extends StateTransitionOperation {
@@ -16,7 +18,7 @@ export interface AddAuthOperation extends StateTransitionOperation {
 }
 
 export interface RevokeAuthOperation extends StateTransitionOperation {
-    type: "revokeClaim",
+    type: "revokeAuth",
     publicKeyX: bigint
 }
 
