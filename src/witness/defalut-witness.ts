@@ -35,8 +35,8 @@ function getDefaultIopECDSAWitness(n: number) {
 
 export function getDefaultStateTransitionEDDSAWitness(n: number) {
     const defaultStateTransitionEDDSAWitness: StateTransitionByEDDSASignatureWitness = {
-        publicKeyX: new Array(32).fill(0),
-        publicKeyY: new Array(32).fill(0),
+        publicKeyX: 0n,
+        publicKeyY: 0n,
         authPath: new Array(n).fill(0n),
         authIndex: 0,
         claimRoot: 0n,

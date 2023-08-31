@@ -2,10 +2,10 @@ use dep::noirlib;
 
 fn main(
     claim: [Field; 8], 
-    expected_schema: Field, 
-    valid_until: Field, 
-    expected_sequel: Field, 
-    expected_subject: Field,
+    expected_schema: pub Field, 
+    valid_until: pub Field, 
+    expected_sequel: pub Field, 
+    expected_subject: pub Field,
     eddsa_public_key_x: Field,
     eddsa_public_key_y: Field,
     eddsa_signature_s: Field,
@@ -14,9 +14,9 @@ fn main(
     ecdsa_public_key_x: [u8; 32],
     ecdsa_public_key_y: [u8; 32],
     ecdsa_signature: [u8; 64],
-    slot_index: u8,
-    attesting_value: Field,
-    operator: u8
+    slot_index: pub u8,
+    attesting_value: pub Field,
+    operator: pub u8
     ) {
     noirlib::claim::verify_claim_fields(claim, expected_schema, valid_until, expected_sequel, expected_subject);
     let claim_hash = noirlib::claim::claim_hash(claim);

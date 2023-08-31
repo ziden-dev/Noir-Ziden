@@ -1,4 +1,4 @@
-import { PublicKeyType } from "../utils/type.js";
+import { PublicKeyType } from "../index.js";
 import { AuthMerkleTree } from "../tree/auth-tree.js";
 import { ClaimMerkleTree } from "../tree/claim-tree.js";
 import { IndexedMerkleTree } from "../tree/indexed-merkle-tree.js";

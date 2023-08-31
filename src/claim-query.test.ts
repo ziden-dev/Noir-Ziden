@@ -18,7 +18,7 @@ import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
 import circuit from "./circuits/ecdsa_claim_presentation/target/ecdsa_claim_presentation.json" assert { type: "json" };
 import { decompressSync } from "fflate";
 import { CryptographyPrimitives } from "./crypto/index.js";
-import { PublicKeyType } from "./utils/type.js";
+import { PublicKeyType } from "./index.js";
 import ClaimBuilder from "./claim/claim-builder.js";
 import Claim from "./claim/claim.js";
 import { ClaimExistenceProofWitness, ClaimNonRevocationProofWitness, ECDSAPublicKey, EDDSAPublicKey, IdOwnershipByECDSASignatureWitness, MembershipSetProofWitness, NonMembershipSetProofWitness } from "./index.js";

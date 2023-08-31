@@ -84,7 +84,7 @@ export class StateTransitionByEDDSASignatureWitnessBuilder {
     }
 
 
-    withPublicKey(publicKeyX: number[], publicKeyY: number[]) {
+    withPublicKey(publicKeyX: BigInt, publicKeyY: BigInt) {
         this.witness.publicKeyX = publicKeyX;
         this.witness.publicKeyY = publicKeyY;
         return this;

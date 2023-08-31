@@ -1,4 +1,4 @@
-import { PublicKeyType } from "../utils/type.js";
+import { PublicKeyType } from "../index.js";
 import { Leaf, MerkleTree } from "./merkle-tree.js";
 
 class AuthLeaf implements Leaf {

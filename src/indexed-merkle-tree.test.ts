@@ -12,7 +12,7 @@ import { convertToHexAndPad, object2Array } from "./utils/bits.js";
 import { CryptographyPrimitives } from "./crypto/index.js";
 
 
-describe("test", () => {
+describe("test indexed merkle tree", () => {
     let poseidon: any;
     let acirBuffer: any;
     let acirBufferUncompressed: any;
@@ -132,55 +132,7 @@ describe("test", () => {
             false
         );
 
-        console.log(proof)
-        await api.acirInitProvingKey(acirComposer, acirBufferUncompressed);
-        const verified = await api.acirVerifyProof(acirComposer, proof, false);
 
-        expect(verified).to.be.true;
-
-    })
-
-    it("circuit insert tree", async () => {
-
-        //   root
-        //    /\
-        //   a  zero[2]
-        //  /  \
-        // b    c
-        // /\   /\
-        //0  3 1  zero[0]
-        //1  0 3
-        //2  0 1
-
-        var tree = new IndexedMerkleTree(3, poseidon);
-
-        tree.insert(3n);
-        var inputs2 = (tree.insert(1n));
-
-        // var inputs2 = [1, 1];
-
-        var inputs = object2Array(inputs2);
-
-        const witness = new Map<number, string>();
-
-        inputs.forEach((input, index) => {
-            witness.set(index + 1, convertToHexAndPad(input));
-        });
-
-
-        const witnessMap = await executeCircuit(acirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
-
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            acirComposer,
-            acirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-        console.log(proof)
         await api.acirInitProvingKey(acirComposer, acirBufferUncompressed);
         const verified = await api.acirVerifyProof(acirComposer, proof, false);
 

@@ -7,7 +7,7 @@ import {
 } from "../utils/bits.js";
 import { ClaimExistenceProofWitness, ClaimNonRevocationProofWitness, ECDSAPublickeyLEBytes, ECDSASignature, EDDSAPublicKey, EDDSASignature, IdOwnershipByECDSASignatureWitness, IdOwnershipByEDDSASignatureWitness, MembershipSetProofWitness, NonMembershipSetProofWitness, StateTransitionByECDSASignatureWitness, StateTransitionByEDDSASignatureWitness } from "../index.js";
 
-import { AddAuthOperation, IssueClaimOperation, RevokeAuthOperation, RevokeClaimOperation, StateTransitionOperation } from "./type.js";
+import { AddAuthOperation, IssueClaimOperation, RevokeAuthOperation, RevokeClaimOperation, StateTransitionOperation } from "../index.js";
 import { CryptographyPrimitives } from "../crypto/index.js";
 import { bigInt2BytesLE } from "./bits.js";
 
