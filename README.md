@@ -1,8 +1,8 @@
 # Noir-Ziden
 
-This is the proof-of-concept project of Ziden protocol with circuits written in Noir
+This is the proof-of-concept project of the Privacy-Preserving W3C verifiable credentials protocol with circuits written in Noir
 
-In this first version, we have completed the Noir circuits, test scripts as well as the TS scripts that serve the protocol's logic as specified in the [Protocol-specs](https://github.com/ziden-dev/Noir-Ziden/tree/main/specs)
+In this first version contains completent Noir circuits, test scripts as well as the TS scripts that serve the protocol's logic as specified in the [Protocol-specs](https://github.com/ziden-dev/Noir-Ziden/tree/main/specs)
 
 ## Components
 
@@ -23,7 +23,7 @@ Upcoming features:
 
 ### 2. Digital Signature
 
-Digital signatures are used in the protocol as a principal authorization mechanism, in this version, we support 2 algorithms:
+Digital signatures are used in the protocol as a principal authorization mechanism, this version supports 2 algorithms:
 
 - EdDSA
 - ECDSA
