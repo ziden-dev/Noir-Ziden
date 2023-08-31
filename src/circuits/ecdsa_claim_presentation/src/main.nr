@@ -1,0 +1,126 @@
+use dep::noirlib;
+fn main(
+    claim: [Field; 8],
+
+    // Id ownership proof - IOP
+    public_key_x: [u8; 32],
+    public_key_y: [u8; 32],
+    iop_auth_path: [Field; 8],
+    iop_auth_index: Field,
+    iop_claim_root: Field,
+    iop_revoked_claim_root: Field,
+    holder_state: Field,
+    signature: [u8; 64],
+    challenge: Field,
+    
+    // Claim existence proof - CEP
+    cep_claim_merkle_path: [Field; 10], 
+    cep_claim_index: Field, 
+    cep_claim_root: Field,
+    cep_auth_root: Field,
+    cep_revoked_claim_root: Field,
+    cep_issuer_state: Field,
+
+    // Claim non-revocation proof - CNP
+    cnp_path_low: [Field; 10], 
+    cnp_val_low: Field, 
+    cnp_next_val: Field, 
+    cnp_next_idx: Field, 
+    cnp_index_low: Field, 
+    cnp_revocation_root: Field,
+    cnp_auth_root: Field,
+    cnp_claim_root: Field,
+    cnp_issuer_state: Field,
+
+    // Claim validation
+    expected_schema: Field, 
+    valid_until: Field, 
+    expected_sequel: Field, 
+    expected_subject: Field,
+
+    /*
+    0: single
+    1: double
+    2: set
+    3: non-set
+    */
+    query_type: u8, 
+    // Claim query
+    slot_index_0: u8,
+    slot_index_1: u8, 
+    attesting_value: Field, 
+    operator: u8,
+
+    // Set membership
+    set_root: Field, 
+    set_index: Field, 
+    set_merkle_proof: [Field; 6],
+
+    // Set non-membership - SNM
+    snm_path_low: [Field; 6], 
+    snm_val_low: Field, 
+    snm_next_val: Field, 
+    snm_next_idx: Field, 
+    snm_index_low: Field, 
+    snm_root: Field
+) {
+    noirlib::claim_presentation::present_claim_with_ecdsa(
+        claim,
+
+        // Id ownership proof - IOP
+        public_key_x,
+        public_key_y,
+        iop_auth_path,
+        iop_auth_index,
+        iop_claim_root,
+        iop_revoked_claim_root,
+        holder_state,
+        signature,
+        challenge,
+    
+        // Claim existence proof - CEP
+        cep_claim_merkle_path, 
+        cep_claim_index, 
+        cep_claim_root,
+        cep_auth_root,
+        cep_revoked_claim_root,
+        cep_issuer_state,
+
+        // Claim non-revocation proof - CNP
+        cnp_path_low, 
+        cnp_val_low, 
+        cnp_next_val, 
+        cnp_next_idx, 
+        cnp_index_low, 
+        cnp_revocation_root,
+        cnp_auth_root,
+        cnp_claim_root,
+        cnp_issuer_state,
+
+        // Claim validation
+        expected_schema, 
+        valid_until, 
+        expected_sequel, 
+        expected_subject,
+
+        query_type, 
+        // Claim query
+        slot_index_0,
+        slot_index_1, 
+        attesting_value, 
+        operator,
+
+        // Set membership
+        set_root, 
+        set_index, 
+        set_merkle_proof,
+
+        // Set non-membership - SNM
+        snm_path_low, 
+        snm_val_low, 
+        snm_next_val, 
+        snm_next_idx, 
+        snm_index_low, 
+        snm_root
+    );
+}

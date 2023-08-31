@@ -1,0 +1,8 @@
+[package]
+name = "indexed_merkle_tree"
+type = "bin"
+authors = [""]
+compiler_version = "0.10.3"
+
+[dependencies]
+noirlib={path = "../noirlib"}
