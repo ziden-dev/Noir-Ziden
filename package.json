@@ -1,14 +1,17 @@
 {
-  "name": "noir-ziden",
+  "name": "@zidendev/noir-ziden",
   "version": "0.0.1",
   "type": "module",
   "dependencies": {
+    "@aztec/bb.js": "^0.3.6",
+    "@noir-lang/acvm_js": "git+https://git@github.com/noir-lang/acvm-simulator-wasm.git#b9d9ca9dfc5140839f23998d9466307215607c42",
     "@typechain/ethers-v5": "^10.1.0",
     "@types/eccrypto": "^1.1.3",
     "bigint-buffer": "^1.1.5",
     "blake2": "^5.0.0",
     "circomlibjs": "^0.1.7",
     "dotenv": "^16.0.3",
+    "fflate": "^0.8.0",
     "hardhat-gas-reporter": "^1.0.8",
     "keccak256": "^1.0.6",
     "save-dev": "^0.0.1-security",
@@ -17,15 +20,13 @@
     "typechain": "^8.1.0"
   },
   "devDependencies": {
-    "@aztec/bb.js": "^0.3.6",
-    "@noir-lang/acvm_js": "git+https://git@github.com/noir-lang/acvm-simulator-wasm.git#b9d9ca9dfc5140839f23998d9466307215607c42",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.16.14",
     "chai": "^4.3.7",
     "ethers": "^5.7.2",
-    "fflate": "^0.8.0",
     "mocha": "^10.2.0",
+    "npmignore": "^0.3.0",
     "typescript": "^4.9.3"
   },
   "scripts": {
@@ -33,6 +34,25 @@
     "test-claim": "npm test src/claim.test.ts",
     "test-indexed-merkle-tree": "npm test src/indexed-merkle-tree.test.ts",
     "test-state": "npm test src/state-transition.test.ts",
-    "test-claim-query": "npm test src/claim-query.test.ts"
+    "test-claim-query": "npm test src/claim-query.test.ts",
+    "build": "tsc --project tsconfig.build.json",
+    "prepare": "npm run build",
+    "prepack": "npmignore --auto .npmignore"
+  },
+  "publishConfig": {
+    "access": "public",
+    "ignore": [
+      "src",
+      "crs",
+      "specs",
+      ".eslintrc.cjs",
+      ".husky",
+      ".mocharc.cjs",
+      ".prettierrc",
+      ".vscode/settings.json",
+      "tsconfig.build.json",
+      "tsconfig.json",
+      "compile.sh"
+    ]
   }
 }

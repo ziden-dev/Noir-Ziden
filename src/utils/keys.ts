@@ -1,13 +1,26 @@
 import { Entity, Issuer } from "../state/state.js";
 import pkg from "secp256k1";
 const { ecdsaSign, publicKeyCreate } = pkg;
+import { bigInt2Uint8Array, uint8ArrayToBigInt } from "../utils/bits.js";
 import {
-  bigInt2Uint8Array,
-  uint8ArrayToBigInt,
-} from "../utils/bits.js";
-import { ClaimExistenceProofWitness, ClaimNonRevocationProofWitness, ECDSAPublickeyLEBytes, ECDSASignature, EDDSAPublicKey, EDDSASignature, IdOwnershipByECDSASignatureWitness, IdOwnershipByEDDSASignatureWitness, MembershipSetProofWitness, NonMembershipSetProofWitness, StateTransitionByECDSASignatureWitness, StateTransitionByEDDSASignatureWitness } from "../index.js";
-
-import { AddAuthOperation, IssueClaimOperation, RevokeAuthOperation, RevokeClaimOperation, StateTransitionOperation } from "./type.js";
+  ClaimExistenceProofWitness,
+  ClaimNonRevocationProofWitness,
+  ECDSAPublickeyLEBytes,
+  ECDSASignature,
+  EDDSAPublicKey,
+  EDDSASignature,
+  IdOwnershipByECDSASignatureWitness,
+  IdOwnershipByEDDSASignatureWitness,
+  MembershipSetProofWitness,
+  NonMembershipSetProofWitness,
+  StateTransitionByECDSASignatureWitness,
+  StateTransitionByEDDSASignatureWitness,
+  AddAuthOperation,
+  IssueClaimOperation,
+  RevokeAuthOperation,
+  RevokeClaimOperation,
+  StateTransitionOperation,
+} from "../index.js";
 import { CryptographyPrimitives } from "../crypto/index.js";
 import { bigInt2BytesLE } from "./bits.js";
 
@@ -15,7 +28,9 @@ import { ECDSAPublicKey } from "../index.js";
 import { NormalMerkleTree } from "../tree/normal-merkle-tree.js";
 import { IndexedMerkleTree } from "../tree/indexed-merkle-tree.js";
 
-export async function getEDDSAPublicKeyFromPrivateKey(privateKey: BigInt): Promise<EDDSAPublicKey> {
+export async function getEDDSAPublicKeyFromPrivateKey(
+  privateKey: BigInt
+): Promise<EDDSAPublicKey> {
   const crypto = await CryptographyPrimitives.getInstance();
   const F = crypto.bn128ScalarField;
   var eddsa = crypto.eddsa;
@@ -27,8 +42,6 @@ export async function getEDDSAPublicKeyFromPrivateKey(privateKey: BigInt): Promi
   };
 }
 
-
-
 export async function signEDDSAChallenge(
   privateKey: BigInt,
   challenge: BigInt
@@ -37,7 +50,10 @@ export async function signEDDSAChallenge(
   const F = crypto.bn128ScalarField;
   var eddsa = crypto.eddsa;
   const message = F.e(challenge);
-  const signature = eddsa.signPoseidon(bigInt2Uint8Array(privateKey, 32), message);
+  const signature = eddsa.signPoseidon(
+    bigInt2Uint8Array(privateKey, 32),
+    message
+  );
   return {
     S: signature.S,
     R8X: F.toObject(signature.R8[0]),
@@ -58,14 +74,16 @@ export async function idOwnershipByEDDSASignature(
     challenge,
   };
 }
-export function getECDSAPublicKeyFromPrivateKey(privateKey: BigInt): ECDSAPublicKey {
+export function getECDSAPublicKeyFromPrivateKey(
+  privateKey: BigInt
+): ECDSAPublicKey {
   const pubKey = publicKeyCreate(bigInt2Uint8Array(privateKey, 32), false);
   const pubKeyX = pubKey.slice(1, 33);
   const pubKeyY = pubKey.slice(33, 65);
   return {
     X: uint8ArrayToBigInt(pubKeyX),
     Y: uint8ArrayToBigInt(pubKeyY),
-  }
+  };
 }
 export function getECDSAPublicKeyLEFromPrivateKey(
   privateKey: BigInt
@@ -75,28 +93,37 @@ export function getECDSAPublicKeyLEFromPrivateKey(
   const pubKeyY = pubKey.slice(33, 65);
   return {
     X: pubKeyX,
-    Y: pubKeyY
+    Y: pubKeyY,
   };
 }
 
-export async function signECDSAChallenge(privateKey: BigInt, challenge: BigInt): Promise<ECDSASignature> {
-  const res = ecdsaSign(bigInt2Uint8Array(challenge, 32), bigInt2Uint8Array(privateKey, 32));
+export async function signECDSAChallenge(
+  privateKey: BigInt,
+  challenge: BigInt
+): Promise<ECDSASignature> {
+  const res = ecdsaSign(
+    bigInt2Uint8Array(challenge, 32),
+    bigInt2Uint8Array(privateKey, 32)
+  );
   return Array.from(res.signature);
 }
 
-export async function idOwnershipByECDSASignature(privateKey: BigInt, entity: Entity, challenge: BigInt): Promise<IdOwnershipByECDSASignatureWitness> {
+export async function idOwnershipByECDSASignature(
+  privateKey: BigInt,
+  entity: Entity,
+  challenge: BigInt
+): Promise<IdOwnershipByECDSASignatureWitness> {
   const pubkey = getECDSAPublicKeyFromPrivateKey(privateKey);
   const signature = await signECDSAChallenge(privateKey, challenge);
-  const authProof = entity.getAuthProof(pubkey.X)
+  const authProof = entity.getAuthProof(pubkey.X);
   return {
     ...authProof,
     publicKeyX: bigInt2BytesLE(authProof.publicKeyX, 32),
     publicKeyY: bigInt2BytesLE(authProof.publicKeyY, 32),
     signature,
-    challenge
-  }
+    challenge,
+  };
 }
-
 
 function doOperations(entity: Entity, operations: StateTransitionOperation[]) {
   for (var operation of operations) {
@@ -115,7 +142,11 @@ function doOperations(entity: Entity, operations: StateTransitionOperation[]) {
         break;
       case "addAuth":
         const addAuthOperation = operation as AddAuthOperation;
-        entity.addAuth(addAuthOperation.publicKeyX, addAuthOperation.publicKeyY, addAuthOperation.publicKeyType);
+        entity.addAuth(
+          addAuthOperation.publicKeyX,
+          addAuthOperation.publicKeyY,
+          addAuthOperation.publicKeyType
+        );
         break;
       case "revokeAuth":
         const revokeAuthOperation = operation as RevokeAuthOperation;
@@ -125,8 +156,11 @@ function doOperations(entity: Entity, operations: StateTransitionOperation[]) {
   }
 }
 
-
-export async function stateTransitionByEDDSASignature(privateKey: BigInt, entity: Entity, operations: StateTransitionOperation[]): Promise<StateTransitionByEDDSASignatureWitness> {
+export async function stateTransitionByEDDSASignature(
+  privateKey: BigInt,
+  entity: Entity,
+  operations: StateTransitionOperation[]
+): Promise<StateTransitionByEDDSASignatureWitness> {
   const pubkey = await getEDDSAPublicKeyFromPrivateKey(privateKey);
   const authProof = entity.getAuthProof(pubkey.X);
   authProof.oldState = authProof.state;
@@ -138,11 +172,15 @@ export async function stateTransitionByEDDSASignature(privateKey: BigInt, entity
   return {
     ...authProof,
     newState,
-    ...signature
-  }
+    ...signature,
+  };
 }
 
-export async function stateTransitionByECDSASignature(privateKey: BigInt, entity: Entity, operations: StateTransitionOperation[]): Promise<StateTransitionByECDSASignatureWitness> {
+export async function stateTransitionByECDSASignature(
+  privateKey: BigInt,
+  entity: Entity,
+  operations: StateTransitionOperation[]
+): Promise<StateTransitionByECDSASignatureWitness> {
   const pubkey = getECDSAPublicKeyFromPrivateKey(privateKey);
   const authProof = entity.getAuthProof(pubkey.X);
   authProof.old_state = authProof.state;
@@ -156,11 +194,14 @@ export async function stateTransitionByECDSASignature(privateKey: BigInt, entity
     publicKeyX: bigInt2BytesLE(authProof.publicKeyX, 32),
     publicKeyY: bigInt2BytesLE(authProof.publicKeyY, 32),
     new_state,
-    signature
-  }
+    signature,
+  };
 }
 
-export async function ClaimExistenceProof(issuer: Issuer, claimIndex: number): Promise<ClaimExistenceProofWitness> {
+export async function ClaimExistenceProof(
+  issuer: Issuer,
+  claimIndex: number
+): Promise<ClaimExistenceProofWitness> {
   var proof = issuer.claimTree.getPathProof(claimIndex);
   var claimRoot = issuer.claimTree.getRoot();
   var authRoot = issuer.authTree.getRoot();
@@ -173,10 +214,13 @@ export async function ClaimExistenceProof(issuer: Issuer, claimIndex: number): P
     authRoot,
     revokedClaimRoot,
     issuerState,
-  }
+  };
 }
 
-export async function ClaimNonRevocationProof(issuer: Issuer, claimHash: BigInt): Promise<ClaimNonRevocationProofWitness> {
+export async function ClaimNonRevocationProof(
+  issuer: Issuer,
+  claimHash: BigInt
+): Promise<ClaimNonRevocationProofWitness> {
   var proof = issuer.revokedClaimTree.getPathProofLow(claimHash);
   var claimRoot = issuer.claimTree.getRoot();
   var authRoot = issuer.authTree.getRoot();
@@ -192,10 +236,15 @@ export async function ClaimNonRevocationProof(issuer: Issuer, claimHash: BigInt)
     authRoot,
     claimRoot,
     issuerState,
-  }
+  };
 }
 
-export async function MembershipSetProof(n: number, hashser: any, values: BigInt[], setIndex: number): Promise<MembershipSetProofWitness> {
+export async function MembershipSetProof(
+  n: number,
+  hashser: any,
+  values: BigInt[],
+  setIndex: number
+): Promise<MembershipSetProofWitness> {
   var merkleTree = new NormalMerkleTree(n, hashser);
   for (var value of values) {
     merkleTree.insert(value);
@@ -205,11 +254,16 @@ export async function MembershipSetProof(n: number, hashser: any, values: BigInt
   return {
     setRoot,
     setIndex,
-    setPath
-  }
+    setPath,
+  };
 }
 
-export async function NonMembershipSetProof(n: number, hashser: any, values: BigInt[], val: BigInt): Promise<NonMembershipSetProofWitness> {
+export async function NonMembershipSetProof(
+  n: number,
+  hashser: any,
+  values: BigInt[],
+  val: BigInt
+): Promise<NonMembershipSetProofWitness> {
   var nmpMerkleTree = new IndexedMerkleTree(n, hashser);
   for (var value of values) {
     nmpMerkleTree.insert(value);
@@ -229,7 +283,6 @@ export async function NonMembershipSetProof(n: number, hashser: any, values: Big
     nmpNextVal,
     nmpNextIndex,
     nmpIndexLow,
-    nmpRoot
-
-  }
+    nmpRoot,
+  };
 }
