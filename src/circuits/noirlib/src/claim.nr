@@ -35,8 +35,9 @@ fn verify_claim_fields(claim: [Field; 8], expected_schema: Field, valid_until: F
     let actual_sequel = utils::from_le_bits(sequel_bits);
     assert(actual_schema == expected_schema);
     assert(actual_sequel == expected_sequel);
-    let unexpired = (expiration_time == 0) | utils::less_than(valid_until, expiration_time);
-    assert(unexpired);
+    if(expiration_time != 0){
+        assert(utils::less_than(valid_until, expiration_time));
+    }
     assert(claim[1] == expected_subject);
 }
 

@@ -1,3 +1,62 @@
+import Claim from "./claim/claim.js";
+
+export { CryptographyPrimitives } from "./crypto/index.js";
+export { Entity, Holder, Issuer } from "./state/state.js";
+export { MerkleTree } from "./tree/merkle-tree.js";
+export { NormalMerkleTree } from "./tree/normal-merkle-tree.js";
+export { IndexedMerkleTree } from "./tree/indexed-merkle-tree.js";
+export { AuthMerkleTree } from "./tree/auth-tree.js";
+export { ClaimMerkleTree } from "./tree/claim-tree.js";
+export * as keyUtils from "./utils/keys.js";
+export * as bitUtils from "./utils/bits.js";
+export { default as Claim } from "./claim/claim.js";
+export { default as ClaimBuilder } from "./claim/claim-builder.js";
+export * as defaultWitness from "./witness/defalut-witness.js";
+export {ECDSAClaimQueryWitnessBuilder, EDDSAClaimQueryWitnessBuilder} from "./witness/claim-query-witness-builder.js";
+export {StateTransitionByECDSASignatureWitnessBuilder, StateTransitionByEDDSASignatureWitnessBuilder} from "./witness/state-transition-witness-builder.js";
+export {
+  getCircuitABIFromName,
+  generateProofAndVerify,
+} from "./berretenberg-api/index.js";
+
+export enum CircuitName {
+  CLAIM,
+  INDEXED_MERKLE_TREE,
+  STATE,
+  EDDSA_CLAIM_PRESENTATION,
+  ECDSA_CLAIM_PRESENTATION,
+}
+export interface IssueClaimOperation extends StateTransitionOperation {
+  type: "issueClaim";
+  claim: Claim;
+}
+
+export interface RevokeClaimOperation extends StateTransitionOperation {
+  type: "revokeClaim";
+  claimHash: BigInt;
+}
+
+export interface AddAuthOperation extends StateTransitionOperation {
+  type: "addAuth";
+  publicKeyX: BigInt;
+  publicKeyY: BigInt;
+  publicKeyType: PublicKeyType;
+}
+
+export interface RevokeAuthOperation extends StateTransitionOperation {
+  type: "revokeAuth";
+  publicKeyX: BigInt;
+}
+
+export interface StateTransitionOperation {
+  type: string;
+}
+
+export enum PublicKeyType {
+  EDDSA = 1,
+  ECDSA = 3,
+  None = 0,
+}
 
 export interface EDDSAPublicKey {
   X: BigInt;
@@ -21,129 +80,129 @@ export interface EDDSASignature {
 }
 
 export interface IdOwnershipByEDDSASignatureWitness {
-  publicKeyX: BigInt,
-  publicKeyY: BigInt,
-  authPath: BigInt[],
-  authIndex: number,
-  claimRoot: BigInt,
-  revokedClaimRoot: BigInt,
-  state: BigInt,
-  signatureS: BigInt,
-  signatureR8X: BigInt,
-  signatureR8Y: BigInt,
-  challenge: BigInt
+  publicKeyX: BigInt;
+  publicKeyY: BigInt;
+  authPath: BigInt[];
+  authIndex: number;
+  claimRoot: BigInt;
+  revokedClaimRoot: BigInt;
+  state: BigInt;
+  signatureS: BigInt;
+  signatureR8X: BigInt;
+  signatureR8Y: BigInt;
+  challenge: BigInt;
 }
 
 export interface IdOwnershipByECDSASignatureWitness {
-  publicKeyX: number[],
-  publicKeyY: number[],
-  authPath: BigInt[],
-  authIndex: number,
-  claimRoot: BigInt,
-  revokedClaimRoot: BigInt,
-  state: BigInt,
-  signature: number[],
-  challenge: BigInt
+  publicKeyX: number[];
+  publicKeyY: number[];
+  authPath: BigInt[];
+  authIndex: number;
+  claimRoot: BigInt;
+  revokedClaimRoot: BigInt;
+  state: BigInt;
+  signature: number[];
+  challenge: BigInt;
 }
 
 export interface StateTransitionByEDDSASignatureWitness {
-  publicKeyX: number[],
-  publicKeyY: number[],
-  authPath: BigInt[],
-  authIndex: number,
-  claimRoot: BigInt,
-  revokedClaimRoot: BigInt,
-  oldState: BigInt,
-  newState: BigInt,
-  signatureS: BigInt,
-  signatureR8X: BigInt,
-  signatureR8Y: BigInt,
-  challenge: BigInt
+  publicKeyX: number[];
+  publicKeyY: number[];
+  authPath: BigInt[];
+  authIndex: number;
+  claimRoot: BigInt;
+  revokedClaimRoot: BigInt;
+  oldState: BigInt;
+  newState: BigInt;
+  signatureS: BigInt;
+  signatureR8X: BigInt;
+  signatureR8Y: BigInt;
+  challenge: BigInt;
 }
 
 export interface StateTransitionByECDSASignatureWitness {
-  publicKeyX: number[],
-  publicKeyY: number[],
-  authPath: BigInt[],
-  authIndex: number,
-  claimRoot: BigInt,
-  revokedClaimRoot: BigInt,
-  oldState: BigInt,
-  newState: BigInt,
-  signature: number[],
-  challenge: BigInt
+  publicKeyX: number[];
+  publicKeyY: number[];
+  authPath: BigInt[];
+  authIndex: number;
+  claimRoot: BigInt;
+  revokedClaimRoot: BigInt;
+  oldState: BigInt;
+  newState: BigInt;
+  signature: number[];
+  challenge: BigInt;
 }
 
 export interface ClaimExistenceProofWitness {
-  claimPath: BigInt[],
-  claimIndex: number,
-  claimRoot: BigInt,
-  authRoot: BigInt,
-  revokedClaimRoot: BigInt,
-  issuerState: BigInt
+  claimPath: BigInt[];
+  claimIndex: number;
+  claimRoot: BigInt;
+  authRoot: BigInt;
+  revokedClaimRoot: BigInt;
+  issuerState: BigInt;
 }
 
 export interface ClaimNonRevocationProofWitness {
-  pathLow: BigInt[],
-  valLow: BigInt,
-  nextVal: BigInt,
-  nextIdx: number,
-  indexLow: number,
-  revokedClaimRoot: BigInt,
-  authRoot: BigInt,
-  claimRoot: BigInt,
-  issuerState: BigInt
+  pathLow: BigInt[];
+  valLow: BigInt;
+  nextVal: BigInt;
+  nextIdx: number;
+  indexLow: number;
+  revokedClaimRoot: BigInt;
+  authRoot: BigInt;
+  claimRoot: BigInt;
+  issuerState: BigInt;
 }
 
 export interface MembershipSetProofWitness {
-  setRoot: BigInt,
-  setIndex: number,
-  setPath: BigInt[]
+  setRoot: BigInt;
+  setIndex: number;
+  setPath: BigInt[];
 }
 
 export interface NonMembershipSetProofWitness {
-  nmpPathLow: BigInt[],
-  nmpValLow: BigInt,
-  nmpNextVal: BigInt,
-  nmpNextIndex: number,
-  nmpIndexLow: number,
-  nmpRoot: BigInt
+  nmpPathLow: BigInt[];
+  nmpValLow: BigInt;
+  nmpNextVal: BigInt;
+  nmpNextIndex: number;
+  nmpIndexLow: number;
+  nmpRoot: BigInt;
 }
 
 export type ECDSASignature = number[];
 
 export interface EDDSAClaimQueryWitness {
-  claimSlots: BigInt[],
-  iopWitness: IdOwnershipByEDDSASignatureWitness,
-  cepWitness: ClaimExistenceProofWitness,
-  cnpWitness: ClaimNonRevocationProofWitness,
-  schemaHash: BigInt,
-  validUntil: BigInt,
-  sequel: BigInt,
-  subject: BigInt,
-  queryType: number,
-  slotIndex0: number,
-  slotIndex1: number,
-  attestingValue: BigInt,
-  operator: number,
-  mpWitness: MembershipSetProofWitness,
-  nmpWitness: NonMembershipSetProofWitness
+  claimSlots: BigInt[];
+  iopWitness: IdOwnershipByEDDSASignatureWitness;
+  cepWitness: ClaimExistenceProofWitness;
+  cnpWitness: ClaimNonRevocationProofWitness;
+  schemaHash: BigInt;
+  validUntil: BigInt;
+  sequel: BigInt;
+  subject: BigInt;
+  queryType: number;
+  slotIndex0: number;
+  slotIndex1: number;
+  attestingValue: BigInt;
+  operator: number;
+  mpWitness: MembershipSetProofWitness;
+  nmpWitness: NonMembershipSetProofWitness;
 }
 
 export interface ECDSAClaimQueryWitness {
-  claimSlots: BigInt[],
-  iopWitness: IdOwnershipByECDSASignatureWitness,
-  cepWitness: ClaimExistenceProofWitness,
-  cnpWitness: ClaimNonRevocationProofWitness,
-  schemaHash: BigInt,
-  validUntil: BigInt,
-  sequel: BigInt,
-  subject: BigInt,
-  queryType: number,
-  slotIndex0: number,
-  slotIndex1: number,
-  attestingValue: BigInt,
-  operator: number,
-  mpWitness: MembershipSetProofWitness,
-  nmpWitness: NonMembershipSetProofWitness
+  claimSlots: BigInt[];
+  iopWitness: IdOwnershipByECDSASignatureWitness;
+  cepWitness: ClaimExistenceProofWitness;
+  cnpWitness: ClaimNonRevocationProofWitness;
+  schemaHash: BigInt;
+  validUntil: BigInt;
+  sequel: BigInt;
+  subject: BigInt;
+  queryType: number;
+  slotIndex0: number;
+  slotIndex1: number;
+  attestingValue: BigInt;
+  operator: number;
+  mpWitness: MembershipSetProofWitness;
+  nmpWitness: NonMembershipSetProofWitness;
 }

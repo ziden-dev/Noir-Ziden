@@ -7,9 +7,13 @@ typechain-types
 target
 crs
 
+package-lock.json
+
 # Hardhat files
 cache
 artifacts
+build
 
+.npmignore
 **/*proofs*/
 **/*target*/
