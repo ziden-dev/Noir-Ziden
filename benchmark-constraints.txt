@@ -1,0 +1,4 @@
+ecdsa claim presentation circuit size: 195600
+eddsa claim presentation circuit size: 194085
+ecdsa state transition circuit size: 50029
+eddsa state transition circuit size: 48507

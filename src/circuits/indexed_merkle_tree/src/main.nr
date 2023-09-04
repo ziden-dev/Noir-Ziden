@@ -17,7 +17,3 @@ fn main(root_old: pub Field, root_new: pub Field, path_low: [Field; 3], index_lo
             path_new
         );
 }
-
-// fn main(a: Field, b: Field) {
-//     assert(a==b);
-// }
