@@ -93,24 +93,12 @@ describe("test indexed merkle tree", () => {
 
     it("circuit insert tree", async () => {
 
-        //   root
-        //    /\
-        //   a  zero[2]
-        //  /  \
-        // b    c
-        // /\   /\
-        //0  3 1  zero[0]
-        //1  0 3
-        //2  0 1
 
-        var tree = new IndexedMerkleTree(3, poseidon);
+        var tree = new IndexedMerkleTree(10, poseidon);
 
         tree.insert(3n);
-        var inputs2 = (tree.insert(1n));
 
-        // var inputs2 = [1, 1];
-
-        var inputs = object2Array(inputs2);
+        var inputs = object2Array(tree.insert(1n));
 
         const witness = new Map<number, string>();
 

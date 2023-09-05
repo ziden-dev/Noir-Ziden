@@ -3,7 +3,7 @@ use dep::noirlib;
 
 fn main(public_key_x: [u8;32],
             public_key_y: [u8;32],
-            auth_path: [Field; 3],
+            auth_path: [Field; 8],
             auth_index: Field,
             claim_root: Field,
             revoked_claim_root: Field,

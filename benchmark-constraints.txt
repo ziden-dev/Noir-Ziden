@@ -1,4 +1,5 @@
-ecdsa claim presentation circuit size: 195600
-eddsa claim presentation circuit size: 194085
-ecdsa state transition circuit size: 50029
-eddsa state transition circuit size: 48507
+ecdsa claim presentation circuit size (nAuth = 8, nClaim = 10, nSet = 6): 195600
+eddsa claim presentation circuit size (nAuth = 8, nClaim = 10, nSet = 6): 194085
+ecdsa state transition circuit size (nAuth = 8): 62095
+eddsa state transition circuit size (nAuth = 8): 60573
+insert indexed merkle tree circuit size (n = 10): 109751

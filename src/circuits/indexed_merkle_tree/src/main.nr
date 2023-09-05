@@ -2,8 +2,17 @@
 use dep::std;
 use dep::noirlib;
 
-fn main(root_old: pub Field, root_new: pub Field, path_low: [Field; 3], index_low: Field, val_low: Field, next_val_low: Field, 
-            next_idx_low:Field, val: Field, index: Field, path_new:[Field;3]) {    
+fn main(root_old: pub Field, 
+        root_new: pub Field, 
+        path_low: [Field; 10], 
+        index_low: Field, 
+        val_low: Field, 
+        next_val_low: Field, 
+        next_idx_low:Field, 
+        val: Field, 
+        index: Field, 
+        path_new:[Field;10]) 
+    {    
         noirlib::indexed_merkle_tree::insert(
             root_old,
             root_new,
