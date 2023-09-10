@@ -6,7 +6,7 @@ import {
     RawBuffer,
 } from "@aztec/bb.js/dest/node/index.js";
 import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
-import circuit from "./circuits/indexed_merkle_tree/target/indexed_merkle_tree.json" assert { type: "json" };
+import circuit from "./circuits-abi/indexed_merkle_tree.json" assert { type: "json" };
 import { decompressSync } from "fflate";
 import { convertToHexAndPad, object2Array } from "./utils/bits.js";
 import { CryptographyPrimitives } from "./crypto/index.js";
@@ -40,7 +40,6 @@ describe("test indexed merkle tree", () => {
 
         acirComposer = await api.acirNewAcirComposer(subgroupSize);
     });
-
 
     it("poseidon", async () => {
         const res = poseidon([1, 2]);
@@ -106,7 +105,6 @@ describe("test indexed merkle tree", () => {
             witness.set(index + 1, convertToHexAndPad(input));
         });
 
-
         const witnessMap = await executeCircuit(acirBuffer, witness, () => {
             throw Error("unexpected oracle");
         });
@@ -125,7 +123,5 @@ describe("test indexed merkle tree", () => {
         const verified = await api.acirVerifyProof(acirComposer, proof, false);
 
         expect(verified).to.be.true;
-
-    })
-
+    });
 });

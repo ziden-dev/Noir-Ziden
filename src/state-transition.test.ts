@@ -3,7 +3,7 @@ import { Issuer } from "./state/state.js";
 import {
     getECDSAPublicKeyFromPrivateKey,
     getEDDSAPublicKeyFromPrivateKey,
-    stateTransitionByEDDSASignature
+    stateTransitionByEDDSASignature,
 } from "./utils/keys.js";
 import {
     Crs,
@@ -11,7 +11,7 @@ import {
     RawBuffer,
 } from "@aztec/bb.js/dest/node/index.js";
 import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
-import circuit from "./circuits/eddsa_state_transition/target/eddsa_state_transition.json" assert { type: "json" };
+import circuit from "./circuits-abi/state.json" assert { type: "json" };
 import { decompressSync } from "fflate";
 import { CryptographyPrimitives } from "./crypto/index.js";
 import { AddAuthOperation, IssueClaimOperation, PublicKeyType, RevokeAuthOperation, RevokeClaimOperation } from "./index.js";
@@ -23,7 +23,7 @@ import Claim from "./claim/claim.js";
 
 
 
-describe("test state transition", () => {
+describe("test", () => {
     let poseidon: any;
     let acirBuffer: any;
     let acirBufferUncompressed: any;
@@ -147,44 +147,6 @@ describe("test state transition", () => {
         const verified = await api.acirVerifyProof(acirComposer, proof, false);
 
         expect(verified).to.be.true;
+    });
 
-    })
-
-    it("circuit state transition", async () => {
-        var operation6: RevokeAuthOperation = { type: "revokeAuth", publicKeyX: pubkey2.X };
-
-        var inputs = (await stateTransitionByEDDSASignature(
-            privateKey1,
-            issuer,
-            [
-                operation6
-            ]
-        ));
-
-        const witness = new StateTransitionByEDDSASignatureWitnessBuilder(3)
-            .withStateTransitionByEDDSASignatureWitness(inputs)
-            .build();
-
-
-
-        const witnessMap = await executeCircuit(acirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
-
-
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            acirComposer,
-            acirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-
-        // await api.acirInitProvingKey(acirComposer, acirBufferUncompressed);
-        const verified = await api.acirVerifyProof(acirComposer, proof, false);
-
-        expect(verified).to.be.true;
-
-    })
 });

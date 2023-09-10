@@ -15,7 +15,7 @@ import {
     RawBuffer,
 } from "@aztec/bb.js/dest/node/index.js";
 import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
-import circuit from "./circuits/eddsa_claim_presentation/target/eddsa_claim_presentation.json" assert { type: "json" };
+import circuit from "./circuits-abi/eddsa_claim_presentation.json" assert { type: "json" };
 import { decompressSync } from "fflate";
 import { CryptographyPrimitives } from "./crypto/index.js";
 import { IdOwnershipByEDDSASignatureWitness, PublicKeyType } from "./index.js";
