@@ -506,6 +506,15 @@ const verified = await generateProofAndVerify(
 
 assert(verified == true);
 ```
+## Benchmark circuits
+
+| Name | Size | 
+|----------|----------|
+| ecdsa claim presentation circuit size (nAuth = 3, nClaim = 3, nSet = 2) | 103009 | 
+| eddsa claim presentation circuit size (nAuth = 3, nClaim = 3, nSet = 2) | 101401 | 
+| ecdsa state transition circuit size (nAuth = 3) | 50029 |
+| eddsa state transition circuit size (nAuth = 3) | 48507 |
+| insert indexed merkle tree circuit size (n = 3) | 39303 |
 
 ## Future work
 
