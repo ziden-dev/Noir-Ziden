@@ -182,6 +182,11 @@ export enum PublicKeyType {
   None = 0
 }
 
+export interface Proof {
+  slicedProof: Uint8Array[],
+  publicInputs: Uint8Array[]
+}
+
 export * as state from "./state/state.js";
 export * as indexedMerkleTree from "./tree/indexed-merkle-tree.js";
 export * as normalMerkleTree from "./tree/normal-merkle-tree.js";

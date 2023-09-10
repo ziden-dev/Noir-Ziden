@@ -22,11 +22,11 @@ async function getCircuitSize(circuit: any) {
 }
 async function main() {
     api = await newBarretenbergApiAsync(4);
-    var data = `ecdsa claim presentation circuit size (nAuth = 8, nClaim = 10, nSet = 6): ${await getCircuitSize(ecdsaClaimPresentationCircuit)}\n`;
-    data = data + (`eddsa claim presentation circuit size (nAuth = 8, nClaim = 10, nSet = 6): ${await getCircuitSize(eddsaClaimPresentationCircuit)}\n`);
-    data = data + (`ecdsa state transition circuit size (nAuth = 8): ${await getCircuitSize(ecdsaStateTransitionCircuit)}\n`);
-    data = data + (`eddsa state transition circuit size (nAuth = 8): ${await getCircuitSize(eddsaStateTransitionCircuit)}\n`);
-    data = data + (`insert indexed merkle tree circuit size (n = 10): ${await getCircuitSize(insertIndexedMerkleTreeCircuit)}\n`);
+    var data = `ecdsa claim presentation circuit size (nAuth = 3, nClaim = 3, nSet = 2): ${await getCircuitSize(ecdsaClaimPresentationCircuit)}\n`;
+    data = data + (`eddsa claim presentation circuit size (nAuth = 3, nClaim = 3, nSet = 2): ${await getCircuitSize(eddsaClaimPresentationCircuit)}\n`);
+    data = data + (`ecdsa state transition circuit size (nAuth = 3): ${await getCircuitSize(ecdsaStateTransitionCircuit)}\n`);
+    data = data + (`eddsa state transition circuit size (nAuth = 3): ${await getCircuitSize(eddsaStateTransitionCircuit)}\n`);
+    data = data + (`insert indexed merkle tree circuit size (n = 3): ${await getCircuitSize(insertIndexedMerkleTreeCircuit)}\n`);
     fs.writeFileSync("benchmark-constraints.txt", data)
 }
 

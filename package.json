@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "type": "module",
   "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "@typechain/ethers-v5": "^10.1.0",
     "@types/eccrypto": "^1.1.3",
     "bigint-buffer": "^1.1.5",
@@ -12,6 +14,7 @@
     "hardhat-gas-reporter": "^1.0.8",
     "keccak256": "^1.0.6",
     "save-dev": "^0.0.1-security",
+    "solidity-bytes-utils": "^0.8.0",
     "solidity-coverage": "^0.8.1",
     "ts-mocha": "^10.0.0",
     "typechain": "^8.1.0"

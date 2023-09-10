@@ -94,7 +94,7 @@ describe("test indexed merkle tree", () => {
     it("circuit insert tree", async () => {
 
 
-        var tree = new IndexedMerkleTree(10, poseidon);
+        var tree = new IndexedMerkleTree(3, poseidon);
 
         tree.insert(3n);
 

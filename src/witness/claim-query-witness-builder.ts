@@ -182,7 +182,6 @@ export class EDDSAClaimQueryWitnessBuilder {
     }
 
     build(): Map<number, string> {
-        console.log(this.witness);
         const witnessMap = new Map<number, string>();
         var inputs = flattenObject(this.witness);
         inputs.forEach((input, index) => {

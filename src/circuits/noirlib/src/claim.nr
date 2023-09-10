@@ -64,13 +64,27 @@ fn verify_claim_ecdsa_signature(
     assert(std::ecdsa_secp256k1::verify_signature(public_key_x ,public_key_y,signature, claim_hash.to_le_bytes(32)) == true);
 }
 
+fn get_value_claim(claim: [Field; 8], slot_index: u8) -> Field{
+    let mut value = 0;
+    if (slot_index == 0) { value = claim[0];}
+    else if (slot_index == 1) {value = claim[1];}
+    else if (slot_index == 2) {value = claim[2];}
+    else if (slot_index == 3) {value = claim[3];}
+    else if (slot_index == 4) {value = claim[4];}
+    else if (slot_index == 5) {value = claim[5];}
+    else if (slot_index == 6) {value = claim[6];}
+    else if (slot_index == 7) {value = claim[7];}
+    assert(slot_index < 8);
+    value
+}
+
 /*
 0: equal
 1: greater than
 2: less than
 */
 fn query_single_value(claim: [Field; 8], slot_index: u8, attesting_value: Field, operator: u8){
-    let value = claim[slot_index];
+    let value = get_value_claim(claim, slot_index);
     if(operator == 0){
         assert(value == attesting_value);
     }else if(operator == 1){
@@ -81,8 +95,8 @@ fn query_single_value(claim: [Field; 8], slot_index: u8, attesting_value: Field,
 }
 
 fn query_double_values(claim: [Field; 8], slot_index_0: u8, slot_index_1: u8, operator: u8){
-    let value_0 = claim[slot_index_0];
-    let value_1 = claim[slot_index_1];
+    let value_0 = get_value_claim(claim, slot_index_0);
+    let value_1 = get_value_claim(claim, slot_index_1);
     if(operator == 0){
         assert(value_0 == value_1);
     }else if(operator == 1){
@@ -93,13 +107,13 @@ fn query_double_values(claim: [Field; 8], slot_index_0: u8, slot_index_1: u8, op
 }
 
 fn verify_membership<N>(claim: [Field; 8], slot_index: u8, root: Field, index: Field, merkle_proof: [Field; N]){
-    let value = claim[slot_index];
+    let value = get_value_claim(claim, slot_index);
     let expected_root = utils::cal_root_from_mtp(merkle_proof, value, index);
     assert(expected_root == root);
 }
 
 fn verify_non_membership<N>(claim: [Field; 8], slot_index: u8, path_low: [Field; N], val_low: Field, next_val: Field, next_idx: Field, index_low: Field, root: Field){
-    let value = claim[slot_index];
+    let value = get_value_claim(claim, slot_index);
     assert(indexed_merkle_tree::check_non_membership(path_low, val_low, value, next_val, next_idx, index_low, root) == true);
 }
 

@@ -76,7 +76,7 @@ describe("test state transition", () => {
         pubkey2 = await getEDDSAPublicKeyFromPrivateKey(privateKey2);
         pubkey3 = getECDSAPublicKeyFromPrivateKey(privateKey3);
 
-        issuer = new Issuer(8, 10, poseidon);
+        issuer = new Issuer(3, 3, poseidon);
         issuer.addAuth(pubkey1.X, pubkey1.Y, PublicKeyType.EDDSA);
 
         schemaHash = BigInt("93819749189437913473");

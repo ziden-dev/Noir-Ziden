@@ -5,7 +5,7 @@ fn main(
     // Id ownership proof - IOP
     public_key_x: [u8; 32],
     public_key_y: [u8; 32],
-    iop_auth_path: [Field; 8],
+    iop_auth_path: [Field; 3],
     iop_auth_index: Field,
     iop_claim_root: Field,
     iop_revoked_claim_root: Field,
@@ -14,7 +14,7 @@ fn main(
     challenge: pub Field,
     
     // Claim existence proof - CEP
-    cep_claim_merkle_path: [Field; 10], 
+    cep_claim_merkle_path: [Field; 3], 
     cep_claim_index: Field, 
     cep_claim_root: Field,
     cep_auth_root: Field,
@@ -22,7 +22,7 @@ fn main(
     cep_issuer_state: pub Field,
 
     // Claim non-revocation proof - CNP
-    cnp_path_low: [Field; 10], 
+    cnp_path_low: [Field; 3], 
     cnp_val_low: Field, 
     cnp_next_val: Field, 
     cnp_next_idx: Field, 
@@ -54,10 +54,10 @@ fn main(
     // Set membership
     set_root: pub Field, 
     set_index: Field, 
-    set_merkle_proof: [Field; 6],
+    set_merkle_proof: [Field; 2],
 
     // Set non-membership - SNM
-    snm_path_low: [Field; 6], 
+    snm_path_low: [Field; 2], 
     snm_val_low: Field, 
     snm_next_val: Field, 
     snm_next_idx: Field, 

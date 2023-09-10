@@ -1,0 +1,4 @@
+{
+    "typescript.tsserver.maxTsServerMemory": 16384,
+    "C_Cpp.intelliSenseMemoryLimit": 16384
+}
