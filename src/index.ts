@@ -79,6 +79,11 @@ export interface EDDSASignature {
   S: BigInt;
 }
 
+export interface Proof {
+  slicedProof: Uint8Array;
+  publicInputs: Uint8Array[];
+}
+
 export interface IdOwnershipByEDDSASignatureWitness {
   publicKeyX: BigInt;
   publicKeyY: BigInt;

@@ -9,18 +9,7 @@ import {
     idOwnershipByEDDSASignature,
     stateTransitionByEDDSASignature
 } from "./utils/keys.js";
-import {
-    Crs,
-    newBarretenbergApiAsync,
-    RawBuffer,
-} from "@aztec/bb.js/dest/node/index.js";
-import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
-import stateCircuit from "./circuits/eddsa_state_transition/target/eddsa_state_transition.json" assert { type: "json" };
-import queryCircuit from "./circuits/eddsa_claim_presentation/target/eddsa_claim_presentation.json" assert { type: "json" };
-
-import { decompressSync } from "fflate";
-import { CryptographyPrimitives } from "./crypto/index.js";
-import { AddAuthOperation, ClaimExistenceProofWitness, ClaimNonRevocationProofWitness, IdOwnershipByEDDSASignatureWitness, MembershipSetProofWitness, NonMembershipSetProofWitness, PublicKeyType, RevokeAuthOperation } from "./index.js";
+import { AddAuthOperation, CircuitName, ClaimExistenceProofWitness, ClaimNonRevocationProofWitness, CryptographyPrimitives, IdOwnershipByEDDSASignatureWitness, MembershipSetProofWitness, NonMembershipSetProofWitness, PublicKeyType, RevokeAuthOperation } from "./index.js";
 import ClaimBuilder from "./claim/claim-builder.js";
 import { StateTransitionByEDDSASignatureWitnessBuilder } from "./witness/state-transition-witness-builder.js";
 import { ECDSAPublicKey, EDDSAPublicKey } from "./index.js";
@@ -31,22 +20,11 @@ import stateArtifacts from './artifacts/src/contracts/State.sol/State.json' asse
 import queryVerifiersArtifacts from './artifacts/src/contracts/QueryVerifier.sol/UltraVerifier.json' assert { type: "json" };
 import queryArtifacts from './artifacts/src/contracts/Query.sol/Query.json'  assert { type: "json" };
 import { EDDSAClaimQueryWitnessBuilder } from "./witness/claim-query-witness-builder.js";
+import { generateProof } from "./berretenberg-api/index.js";
 
 describe("test contract", () => {
     let poseidon: any;
-
-    let stateAcirBuffer: any;
-    let stateAcirBufferUncompressed: any;
-    let stateAcirComposer: any;
-
-    let queryAcirBuffer: any;
-    let queryAcirBufferUncompressed: any;
-    let queryAcirComposer: any;
-
-    let api: any;
-
     let crypto: CryptographyPrimitives;
-
     let claim: Claim;
 
     let schemaHash: BigInt;
@@ -79,53 +57,9 @@ describe("test contract", () => {
     let nmpWitness: NonMembershipSetProofWitness;
 
 
-    function getPublicInputs(proof: any, len: number) {
-        var res = [];
-        for (var i = 0; i < len; i++) {
-            res.push(proof.slice(i * 32, (i + 1) * 32));
-        }
-        return res;
-    }
-
     before(async () => {
         crypto = await CryptographyPrimitives.getInstance();
         poseidon = crypto.poseidon;
-        api = await newBarretenbergApiAsync(4);
-
-        // state acir
-        stateAcirBuffer = Buffer.from(stateCircuit.bytecode, "base64");
-        stateAcirBufferUncompressed = decompressSync(stateAcirBuffer);
-        var [_exact, circuitSize, _subgroup] = await api.acirGetCircuitSizes(
-            stateAcirBufferUncompressed
-        );
-        var subgroupSize = Math.pow(2, Math.ceil(Math.log2(circuitSize)));
-        var crs = await Crs.new(subgroupSize + 1);
-        await api.commonInitSlabAllocator(subgroupSize);
-        await api.srsInitSrs(
-            new RawBuffer(crs.getG1Data()),
-            crs.numPoints,
-            new RawBuffer(crs.getG2Data())
-        );
-        stateAcirComposer = await api.acirNewAcirComposer(subgroupSize);
-
-        // query acir
-        queryAcirBuffer = Buffer.from(queryCircuit.bytecode, "base64");
-        queryAcirBufferUncompressed = decompressSync(queryAcirBuffer);
-        var [_exact, circuitSize, _subgroup] = await api.acirGetCircuitSizes(
-            queryAcirBufferUncompressed
-        );
-        var subgroupSize = Math.pow(2, Math.ceil(Math.log2(circuitSize)));
-        var crs = await Crs.new(subgroupSize + 1);
-        await api.commonInitSlabAllocator(subgroupSize);
-        await api.srsInitSrs(
-            new RawBuffer(crs.getG1Data()),
-            crs.numPoints,
-            new RawBuffer(crs.getG2Data())
-        );
-
-        queryAcirComposer = await api.acirNewAcirComposer(subgroupSize);
-
-        ////
         privateKey1 = BigInt("123");
         privateKey2 = BigInt("12");
         privateKey3 = BigInt("34");
@@ -211,25 +145,9 @@ describe("test contract", () => {
             .withStateTransitionByEDDSASignatureWitness(inputs)
             .build();
 
-        //console.log(witness);
+        var proof = await generateProof(witness, CircuitName.STATE);
 
-        const witnessMap = await executeCircuit(stateAcirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
-
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            stateAcirComposer,
-            stateAcirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-
-        const publicInputs = getPublicInputs(proof, 2);
-        const slicedProof = proof.slice(32 * 2);
-
-        await stateContract.transitState(1, true, slicedProof, publicInputs);
+        await stateContract.transitState(1, true, proof.slicedProof, proof.publicInputs);
     })
 
     it("contract query type 0 ecdsa claim ", async () => {
@@ -255,24 +173,10 @@ describe("test contract", () => {
             .withValidUntil(validUntil)
             .build()
 
-        const witnessMap = await executeCircuit(queryAcirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
-
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            queryAcirComposer,
-            queryAcirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-
-        const publicInputs = getPublicInputs(proof, 15);
-        const slicedProof = proof.slice(32 * 15);
+        var proof = await generateProof(witness, CircuitName.EDDSA_CLAIM_PRESENTATION);
 
 
-        await queryContract.verify(2, 1, slicedProof, publicInputs);
+        await queryContract.verify(2, 1, proof.slicedProof, proof.publicInputs);
     });
 
     it("contract query type 1 ecdsa claim ", async () => {
@@ -291,25 +195,9 @@ describe("test contract", () => {
             .withValidUntil(validUntil)
             .build()
 
+        var proof = await generateProof(witness, CircuitName.EDDSA_CLAIM_PRESENTATION);
 
-
-        const witnessMap = await executeCircuit(queryAcirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
-
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            queryAcirComposer,
-            queryAcirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-
-        const publicInputs = getPublicInputs(proof, 15);
-        const slicedProof = proof.slice(32 * 15);
-
-        await queryContract.verify(2, 1, slicedProof, publicInputs);
+        await queryContract.verify(2, 1, proof.slicedProof, proof.publicInputs);
     });
 
     it("contract query type 2 ecdsa claim ", async () => {
@@ -327,24 +215,9 @@ describe("test contract", () => {
             .withMpWitness(mpWitness)
             .build()
 
-        const witnessMap = await executeCircuit(queryAcirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
+        var proof = await generateProof(witness, CircuitName.EDDSA_CLAIM_PRESENTATION);
 
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            queryAcirComposer,
-            queryAcirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-
-        const publicInputs = getPublicInputs(proof, 15);
-        const slicedProof = proof.slice(32 * 15);
-
-
-        await queryContract.verify(2, 1, slicedProof, publicInputs);
+        await queryContract.verify(2, 1, proof.slicedProof, proof.publicInputs);
     });
 
     it("contract query type 3 ecdsa claim ", async () => {
@@ -362,23 +235,8 @@ describe("test contract", () => {
             .withNmpWitness(nmpWitness)
             .build()
 
-        const witnessMap = await executeCircuit(queryAcirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
+        var proof = await generateProof(witness, CircuitName.EDDSA_CLAIM_PRESENTATION);
 
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            queryAcirComposer,
-            queryAcirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-
-        const publicInputs = getPublicInputs(proof, 15);
-        const slicedProof = proof.slice(32 * 15);
-
-
-        await queryContract.verify(2, 1, slicedProof, publicInputs);
+        await queryContract.verify(2, 1, proof.slicedProof, proof.publicInputs);
     });
 });

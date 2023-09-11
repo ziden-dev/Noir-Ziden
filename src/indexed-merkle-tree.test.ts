@@ -1,44 +1,18 @@
 import { expect } from "chai";
 import { IndexedMerkleTree } from "./tree/indexed-merkle-tree.js";
-import {
-    Crs,
-    newBarretenbergApiAsync,
-    RawBuffer,
-} from "@aztec/bb.js/dest/node/index.js";
-import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
-import circuit from "./circuits-abi/indexed_merkle_tree.json" assert { type: "json" };
-import { decompressSync } from "fflate";
 import { convertToHexAndPad, object2Array } from "./utils/bits.js";
 import { CryptographyPrimitives } from "./crypto/index.js";
+import { generateProofAndVerify } from "./berretenberg-api/index.js";
+import { CircuitName } from "./index.js";
 
 
 describe("test indexed merkle tree", () => {
     let poseidon: any;
-    let acirBuffer: any;
-    let acirBufferUncompressed: any;
-    let api: any;
-    let acirComposer: any;
     let crypto: CryptographyPrimitives;
 
     before(async () => {
         crypto = await CryptographyPrimitives.getInstance();
         poseidon = crypto.poseidon;
-        acirBuffer = Buffer.from(circuit.bytecode, "base64");
-        acirBufferUncompressed = decompressSync(acirBuffer);
-        api = await newBarretenbergApiAsync(4);
-        const [_exact, circuitSize, _subgroup] = await api.acirGetCircuitSizes(
-            acirBufferUncompressed
-        );
-        const subgroupSize = Math.pow(2, Math.ceil(Math.log2(circuitSize)));
-        const crs = await Crs.new(subgroupSize + 1);
-        await api.commonInitSlabAllocator(subgroupSize);
-        await api.srsInitSrs(
-            new RawBuffer(crs.getG1Data()),
-            crs.numPoints,
-            new RawBuffer(crs.getG2Data())
-        );
-
-        acirComposer = await api.acirNewAcirComposer(subgroupSize);
     });
 
     it("poseidon", async () => {
@@ -105,23 +79,6 @@ describe("test indexed merkle tree", () => {
             witness.set(index + 1, convertToHexAndPad(input));
         });
 
-        const witnessMap = await executeCircuit(acirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
-
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            acirComposer,
-            acirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-
-
-        await api.acirInitProvingKey(acirComposer, acirBufferUncompressed);
-        const verified = await api.acirVerifyProof(acirComposer, proof, false);
-
-        expect(verified).to.be.true;
+        await generateProofAndVerify(witness, CircuitName.INDEXED_MERKLE_TREE);
     });
 });

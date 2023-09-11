@@ -1,20 +1,12 @@
-import { expect } from "chai";
 import { Issuer } from "./state/state.js";
 import {
     getECDSAPublicKeyFromPrivateKey,
     getEDDSAPublicKeyFromPrivateKey,
     stateTransitionByEDDSASignature,
 } from "./utils/keys.js";
-import {
-    Crs,
-    newBarretenbergApiAsync,
-    RawBuffer,
-} from "@aztec/bb.js/dest/node/index.js";
-import { executeCircuit, compressWitness } from "@noir-lang/acvm_js";
-import circuit from "./circuits-abi/state.json" assert { type: "json" };
-import { decompressSync } from "fflate";
+
 import { CryptographyPrimitives } from "./crypto/index.js";
-import { AddAuthOperation, IssueClaimOperation, PublicKeyType, RevokeAuthOperation, RevokeClaimOperation } from "./index.js";
+import { AddAuthOperation, CircuitName, IssueClaimOperation, PublicKeyType, RevokeAuthOperation, RevokeClaimOperation, generateProofAndVerify } from "./index.js";
 import ClaimBuilder from "./claim/claim-builder.js";
 import { StateTransitionByEDDSASignatureWitnessBuilder } from "./witness/state-transition-witness-builder.js";
 import { ECDSAPublicKey, EDDSAPublicKey } from "./index.js";
@@ -25,10 +17,6 @@ import Claim from "./claim/claim.js";
 
 describe("test", () => {
     let poseidon: any;
-    let acirBuffer: any;
-    let acirBufferUncompressed: any;
-    let api: any;
-    let acirComposer: any;
     let crypto: CryptographyPrimitives;
 
     let claim: Claim;
@@ -51,22 +39,7 @@ describe("test", () => {
     before(async () => {
         crypto = await CryptographyPrimitives.getInstance();
         poseidon = crypto.poseidon;
-        acirBuffer = Buffer.from(circuit.bytecode, "base64");
-        acirBufferUncompressed = decompressSync(acirBuffer);
-        api = await newBarretenbergApiAsync(4);
-        const [_exact, circuitSize, _subgroup] = await api.acirGetCircuitSizes(
-            acirBufferUncompressed
-        );
-        const subgroupSize = Math.pow(2, Math.ceil(Math.log2(circuitSize)));
-        const crs = await Crs.new(subgroupSize + 1);
-        await api.commonInitSlabAllocator(subgroupSize);
-        await api.srsInitSrs(
-            new RawBuffer(crs.getG1Data()),
-            crs.numPoints,
-            new RawBuffer(crs.getG2Data())
-        );
 
-        acirComposer = await api.acirNewAcirComposer(subgroupSize);
 
         privateKey1 = BigInt("123");
         privateKey2 = BigInt("12");
@@ -129,24 +102,7 @@ describe("test", () => {
             .withStateTransitionByEDDSASignatureWitness(inputs)
             .build();
 
-        //console.log(witness);
-
-        const witnessMap = await executeCircuit(acirBuffer, witness, () => {
-            throw Error("unexpected oracle");
-        });
-
-        const witnessBuff = compressWitness(witnessMap);
-
-        const proof = await api.acirCreateProof(
-            acirComposer,
-            acirBufferUncompressed,
-            decompressSync(witnessBuff),
-            false
-        );
-
-        const verified = await api.acirVerifyProof(acirComposer, proof, false);
-
-        expect(verified).to.be.true;
+        await generateProofAndVerify(witness, CircuitName.STATE);
     });
 
 });
