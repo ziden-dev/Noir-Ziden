@@ -1,6 +1,6 @@
 {
   "name": "@zidendev/noir-ziden",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.3",
