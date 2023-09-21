@@ -107,7 +107,7 @@ describe("test claim query", () => {
 
         var witness = new EDDSAClaimQueryWitnessBuilder(3, 3, 2)
             .withClaimSlots(claim.allSlots)
-            .withECDSAIopWitness(iopWitness)
+            .withEDDSAIopWitness(iopWitness)
             .withCepWitness(cepWitness)
             .withCnpWitness(cnpWitness)
             .withAttestingValue(claim.getSlotValue(0).valueOf() + BigInt(1))
@@ -129,7 +129,7 @@ describe("test claim query", () => {
 
         var witness = new EDDSAClaimQueryWitnessBuilder(3, 3, 2)
             .withClaimSlots(claim.allSlots)
-            .withECDSAIopWitness(iopWitness)
+            .withEDDSAIopWitness(iopWitness)
             .withCepWitness(cepWitness)
             .withCnpWitness(cnpWitness)
             .withSlotIndex1(3)
@@ -151,7 +151,7 @@ describe("test claim query", () => {
 
         var witness = new EDDSAClaimQueryWitnessBuilder(3, 3, 2)
             .withClaimSlots(claim.allSlots)
-            .withECDSAIopWitness(iopWitness)
+            .withEDDSAIopWitness(iopWitness)
             .withCepWitness(cepWitness)
             .withCnpWitness(cnpWitness)
             .withQueryType(2)
@@ -172,7 +172,7 @@ describe("test claim query", () => {
 
         var witness = new EDDSAClaimQueryWitnessBuilder(3, 3, 2)
             .withClaimSlots(claim.allSlots)
-            .withECDSAIopWitness(iopWitness)
+            .withEDDSAIopWitness(iopWitness)
             .withCepWitness(cepWitness)
             .withCnpWitness(cnpWitness)
             .withQueryType(3)

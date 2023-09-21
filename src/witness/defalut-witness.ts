@@ -45,8 +45,7 @@ export function getDefaultStateTransitionEDDSAWitness(n: number) {
         newState: 0n,
         signatureS: 0n,
         signatureR8X: 0n,
-        signatureR8Y: 0n,
-        challenge: 0n
+        signatureR8Y: 0n
     }
 
     return defaultStateTransitionEDDSAWitness;
@@ -62,8 +61,7 @@ export function getDefaultStateTransitionECDSAWitness(n: number) {
         revokedClaimRoot: 0n,
         oldState: 0n,
         newState: 0n,
-        signature: new Array(64).fill(0),
-        challenge: 0n
+        signature: new Array(64).fill(0)
     }
     return defaultStateTransitionECDSAWitness;
 }

@@ -111,7 +111,7 @@ export class EDDSAClaimQueryWitnessBuilder {
         return this;
     }
 
-    withECDSAIopWitness(iopWitness: IdOwnershipByEDDSASignatureWitness) {
+    withEDDSAIopWitness(iopWitness: IdOwnershipByEDDSASignatureWitness) {
         this.witness.iopWitness = iopWitness;
         return this;
     }

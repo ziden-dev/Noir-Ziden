@@ -160,7 +160,7 @@ describe("test contract", () => {
 
         var witness = new EDDSAClaimQueryWitnessBuilder(3, 3, 2)
             .withClaimSlots(claim.allSlots)
-            .withECDSAIopWitness(iopWitness)
+            .withEDDSAIopWitness(iopWitness)
             .withCepWitness(cepWitness)
             .withCnpWitness(cnpWitness)
             .withAttestingValue(claim.getSlotValue(0).valueOf() + BigInt(1))
@@ -182,7 +182,7 @@ describe("test contract", () => {
     it("contract query type 1 ecdsa claim ", async () => {
         var witness = new EDDSAClaimQueryWitnessBuilder(3, 3, 2)
             .withClaimSlots(claim.allSlots)
-            .withECDSAIopWitness(iopWitness)
+            .withEDDSAIopWitness(iopWitness)
             .withCepWitness(cepWitness)
             .withCnpWitness(cnpWitness)
             .withSlotIndex1(3)
@@ -203,7 +203,7 @@ describe("test contract", () => {
     it("contract query type 2 ecdsa claim ", async () => {
         var witness = new EDDSAClaimQueryWitnessBuilder(3, 3, 2)
             .withClaimSlots(claim.allSlots)
-            .withECDSAIopWitness(iopWitness)
+            .withEDDSAIopWitness(iopWitness)
             .withCepWitness(cepWitness)
             .withCnpWitness(cnpWitness)
             .withQueryType(2)
@@ -223,7 +223,7 @@ describe("test contract", () => {
     it("contract query type 3 ecdsa claim ", async () => {
         var witness = new EDDSAClaimQueryWitnessBuilder(3, 3, 2)
             .withClaimSlots(claim.allSlots)
-            .withECDSAIopWitness(iopWitness)
+            .withEDDSAIopWitness(iopWitness)
             .withCepWitness(cepWitness)
             .withCnpWitness(cnpWitness)
             .withQueryType(3)

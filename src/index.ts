@@ -15,6 +15,7 @@ export * as defaultWitness from "./witness/defalut-witness.js";
 export { ECDSAClaimQueryWitnessBuilder, EDDSAClaimQueryWitnessBuilder } from "./witness/claim-query-witness-builder.js";
 export { StateTransitionByECDSASignatureWitnessBuilder, StateTransitionByEDDSASignatureWitnessBuilder } from "./witness/state-transition-witness-builder.js";
 export {
+  generateProof,
   getCircuitABIFromName,
   generateProofAndVerify,
 } from "./berretenberg-api/index.js";
@@ -122,7 +123,6 @@ export interface StateTransitionByEDDSASignatureWitness {
   signatureS: BigInt,
   signatureR8X: BigInt,
   signatureR8Y: BigInt,
-  challenge: BigInt
 }
 
 export interface StateTransitionByECDSASignatureWitness {
@@ -135,7 +135,6 @@ export interface StateTransitionByECDSASignatureWitness {
   oldState: BigInt;
   newState: BigInt;
   signature: number[];
-  challenge: BigInt;
 }
 
 export interface ClaimExistenceProofWitness {
