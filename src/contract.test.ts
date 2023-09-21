@@ -122,7 +122,7 @@ describe("test contract", () => {
 
         mpWitness = await MembershipSetProof(2, poseidon, [claim.getSlotValue(0).valueOf(), 12n], 0);
         nmpWitness = await NonMembershipSetProof(2, poseidon, [1n, 123123123123123n], claim.getSlotValue(0).valueOf());
-        cepWitness = await ClaimExistenceProof(issuer, 0);
+        cepWitness = await ClaimExistenceProof(issuer, await claim.claimHash());
 
     });
 

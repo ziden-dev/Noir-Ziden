@@ -96,9 +96,10 @@ describe("test claim query", () => {
         mpWitness = await MembershipSetProof(2, poseidon, [claim.getSlotValue(0).valueOf(), 12n], 0);
         nmpWitness = await NonMembershipSetProof(2, poseidon, [1n, 123123123123123n], claim.getSlotValue(0).valueOf());
 
+        var claimHash = await claim.claimHash();
         iopWitness = await idOwnershipByEDDSASignature(privateKey1, holder, challenge);
-        cepWitness = await ClaimExistenceProof(issuer, 0);
-        cnpWitness = await ClaimNonRevocationProof(issuer, await claim.claimHash());
+        cepWitness = await ClaimExistenceProof(issuer, claimHash);
+        cnpWitness = await ClaimNonRevocationProof(issuer, claimHash);
     });
 
 

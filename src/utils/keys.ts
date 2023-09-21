@@ -200,8 +200,9 @@ export async function stateTransitionByECDSASignature(
 
 export async function ClaimExistenceProof(
   issuer: Issuer,
-  claimIndex: number
+  claimHash: BigInt
 ): Promise<ClaimExistenceProofWitness> {
+  var claimIndex = issuer.claimTree.getIndex(claimHash);
   var proof = issuer.claimTree.getPathProof(claimIndex);
   var claimRoot = issuer.claimTree.getRoot();
   var authRoot = issuer.authTree.getRoot();

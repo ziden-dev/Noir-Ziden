@@ -1,7 +1,9 @@
 {
-  "name": "@chung0807/noir-ziden",
+  "name": "@chung0807/ziden-noir",
   "version": "0.0.2",
   "type": "module",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "dependencies": {
     "@aztec/bb.js": "^0.3.6",
     "@noir-lang/acvm_js": "git+https://git@github.com/noir-lang/acvm-simulator-wasm.git#b9d9ca9dfc5140839f23998d9466307215607c42",
@@ -20,6 +22,7 @@
     "solidity-bytes-utils": "^0.8.0",
     "solidity-coverage": "^0.8.1",
     "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.1",
     "typechain": "^8.1.0"
   },
   "devDependencies": {
