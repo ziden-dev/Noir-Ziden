@@ -137,7 +137,7 @@ function doOperations(entity: Entity, operations: StateTransitionOperation[]) {
       case "revokeClaim":
         const revokeClaimOperation = operation as RevokeClaimOperation;
         if (entity instanceof Issuer) {
-          entity.revokeAuth(revokeClaimOperation.claimHash);
+          entity.revokeClaim(revokeClaimOperation.claimHash);
         }
         break;
       case "addAuth":
