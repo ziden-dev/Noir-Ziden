@@ -88,7 +88,7 @@ npm run test-claim-query
 - Install as an npm dependency:
 
 ```
-npm i @zidendev/noir-ziden@latest
+npm i @chung0807/noir-ziden@latest
 ```
 
 ### Indexed Merkle Tree
@@ -102,7 +102,7 @@ import {
   bitUtils,
   generateProofAndVerify,
   CircuitName,
-} from "@zidendev/noir-ziden";
+} from "@chung0807/noir-ziden";
 
 const crypto = await CryptographyPrimitives.getInstance();
 const poseidon = crypto.poseidon;
@@ -144,7 +144,7 @@ Technically, a claim is an array of 8 32-byte numbers called slots, which can be
 Example:
 
 ```typescript
-import { ClaimBuilder } from "@zidendev/noir-ziden";
+import { ClaimBuilder } from "@chung0807/noir-ziden";
 
 const schemaHash = BigInt("43914"); // should be the hash of the schema document
 const expirationTime = BigInt(Date.now() + 60 * 60 * 1000);
@@ -216,7 +216,7 @@ import {
   StateTransitionByEDDSASignatureWitnessBuilder,
   generateProofAndVerify,
   CircuitName,
-} from "@zidendev/noir-ziden";
+} from "@chung0807/noir-ziden";
 
 const {
   getEDDSAPublicKeyFromPrivateKey,
@@ -286,7 +286,7 @@ import {
   generateProofAndVerify,
   CircuitName,
   ClaimBuilder,
-} from "@zidendev/noir-ziden";
+} from "@chung0807/noir-ziden";
 
 const {
   getEDDSAPublicKeyFromPrivateKey,
@@ -396,7 +396,7 @@ import {
   generateProofAndVerify,
   CircuitName,
   ECDSAClaimQueryWitnessBuilder,
-} from "@zidendev/noir-ziden";
+} from "@chung0807/noir-ziden";
 
 let claim: Claim;
 
