@@ -1,15 +1,18 @@
 use dep::std;
 
 fn less_than(x: Field, y: Field) ->  bool {
-    let x_bits = x.to_be_bits(254);
-    let y_bits = y.to_be_bits(254);
-    let mut res = false;
-    for i in  0..254 {
-        if (x_bits[i] < y_bits[i]) {
-            res = true;
+    let x_bits = x.to_be_bytes(32);
+    let y_bits = y.to_be_bytes(32);
+    let mut res = 0;
+    for i in  0..32 {
+        if ((x_bits[i] < y_bits[i]) & (res == 0)) {
+            res = 1;
+        }
+        else if ((x_bits[i] > y_bits[i]) & (res == 0)) {
+            res = 2;
         }
     }
-    res
+    res == 1
 }
 
 fn from_le_bits<N>(bits: [u1; N]) -> Field{

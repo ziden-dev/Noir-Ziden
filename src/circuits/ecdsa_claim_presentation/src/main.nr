@@ -5,24 +5,24 @@ fn main(
     // Id ownership proof - IOP
     public_key_x: [u8; 32],
     public_key_y: [u8; 32],
-    iop_auth_path: [Field; 8],
+    iop_auth_path: [Field; 3],
     iop_auth_index: Field,
     iop_claim_root: Field,
     iop_revoked_claim_root: Field,
-    holder_state: Field,
+    holder_state: pub Field,
     signature: [u8; 64],
-    challenge: Field,
+    challenge: pub Field,
     
     // Claim existence proof - CEP
-    cep_claim_merkle_path: [Field; 10], 
+    cep_claim_merkle_path: [Field; 3], 
     cep_claim_index: Field, 
     cep_claim_root: Field,
     cep_auth_root: Field,
     cep_revoked_claim_root: Field,
-    cep_issuer_state: Field,
+    cep_issuer_state: pub Field,
 
     // Claim non-revocation proof - CNP
-    cnp_path_low: [Field; 10], 
+    cnp_path_low: [Field; 3], 
     cnp_val_low: Field, 
     cnp_next_val: Field, 
     cnp_next_idx: Field, 
@@ -30,13 +30,13 @@ fn main(
     cnp_revocation_root: Field,
     cnp_auth_root: Field,
     cnp_claim_root: Field,
-    cnp_issuer_state: Field,
+    cnp_issuer_state: pub Field,
 
     // Claim validation
-    expected_schema: Field, 
-    valid_until: Field, 
-    expected_sequel: Field, 
-    expected_subject: Field,
+    expected_schema: pub Field, 
+    valid_until: pub Field, 
+    expected_sequel: pub Field, 
+    expected_subject: pub Field,
 
     /*
     0: single
@@ -44,25 +44,25 @@ fn main(
     2: set
     3: non-set
     */
-    query_type: u8, 
+    query_type: pub u8, 
     // Claim query
-    slot_index_0: u8,
-    slot_index_1: u8, 
-    attesting_value: Field, 
-    operator: u8,
+    slot_index_0: pub u8,
+    slot_index_1: pub u8, 
+    attesting_value: pub Field, 
+    operator: pub u8,
 
     // Set membership
-    set_root: Field, 
+    set_root: pub Field, 
     set_index: Field, 
-    set_merkle_proof: [Field; 6],
+    set_merkle_proof: [Field; 2],
 
     // Set non-membership - SNM
-    snm_path_low: [Field; 6], 
+    snm_path_low: [Field; 2], 
     snm_val_low: Field, 
     snm_next_val: Field, 
     snm_next_idx: Field, 
     snm_index_low: Field, 
-    snm_root: Field
+    snm_root: pub Field
 ) {
     noirlib::claim_presentation::present_claim_with_ecdsa(
         claim,

@@ -10,10 +10,15 @@ echo "Compiling the index merkle tree circuit..."
 nargo compile
 echo "Successfully compiled the index merkle tree circuit"
 
-cd ../state
+cd ../eddsa_state_transition
 echo "Compiling the state circuit..."
 nargo compile
-echo "Successfully compiled the state circuit"
+echo "Successfully compiled the eddsa state transition circuit"
+
+cd ../ecdsa_state_transition
+echo "Compiling the state circuit..."
+nargo compile
+echo "Successfully compiled the ecdsa state transition circuit"
 
 cd ../eddsa_claim_presentation
 echo "Compiling the eddsa claim presentation circuit..."

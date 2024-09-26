@@ -24,4 +24,11 @@ export class ClaimMerkleTree extends MerkleTree {
         return this.leaves.length - 1;
     }
 
+    getIndex(claimHash: BigInt) {
+        for (var i = 0; i < this.leaves.length; i++) {
+            var node = this.node[this.trueIndex(i)];
+            if (node == claimHash) return i;
+        }
+        return 0;
+    }
 }

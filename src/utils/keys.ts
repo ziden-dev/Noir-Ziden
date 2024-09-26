@@ -137,7 +137,7 @@ function doOperations(entity: Entity, operations: StateTransitionOperation[]) {
       case "revokeClaim":
         const revokeClaimOperation = operation as RevokeClaimOperation;
         if (entity instanceof Issuer) {
-          entity.revokeAuth(revokeClaimOperation.claimHash);
+          entity.revokeClaim(revokeClaimOperation.claimHash);
         }
         break;
       case "addAuth":
@@ -200,8 +200,9 @@ export async function stateTransitionByECDSASignature(
 
 export async function ClaimExistenceProof(
   issuer: Issuer,
-  claimIndex: number
+  claimHash: BigInt
 ): Promise<ClaimExistenceProofWitness> {
+  var claimIndex = issuer.claimTree.getIndex(claimHash);
   var proof = issuer.claimTree.getPathProof(claimIndex);
   var claimRoot = issuer.claimTree.getRoot();
   var authRoot = issuer.authTree.getRoot();

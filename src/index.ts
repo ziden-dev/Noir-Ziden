@@ -12,9 +12,10 @@ export * as bitUtils from "./utils/bits.js";
 export { default as Claim } from "./claim/claim.js";
 export { default as ClaimBuilder } from "./claim/claim-builder.js";
 export * as defaultWitness from "./witness/defalut-witness.js";
-export {ECDSAClaimQueryWitnessBuilder, EDDSAClaimQueryWitnessBuilder} from "./witness/claim-query-witness-builder.js";
-export {StateTransitionByECDSASignatureWitnessBuilder, StateTransitionByEDDSASignatureWitnessBuilder} from "./witness/state-transition-witness-builder.js";
+export { ECDSAClaimQueryWitnessBuilder, EDDSAClaimQueryWitnessBuilder } from "./witness/claim-query-witness-builder.js";
+export { StateTransitionByECDSASignatureWitnessBuilder, StateTransitionByEDDSASignatureWitnessBuilder } from "./witness/state-transition-witness-builder.js";
 export {
+  generateProof,
   getCircuitABIFromName,
   generateProofAndVerify,
 } from "./berretenberg-api/index.js";
@@ -79,6 +80,11 @@ export interface EDDSASignature {
   S: BigInt;
 }
 
+export interface Proof {
+  slicedProof: Uint8Array;
+  publicInputs: Uint8Array[];
+}
+
 export interface IdOwnershipByEDDSASignatureWitness {
   publicKeyX: BigInt;
   publicKeyY: BigInt;
@@ -106,18 +112,17 @@ export interface IdOwnershipByECDSASignatureWitness {
 }
 
 export interface StateTransitionByEDDSASignatureWitness {
-  publicKeyX: number[];
-  publicKeyY: number[];
-  authPath: BigInt[];
-  authIndex: number;
-  claimRoot: BigInt;
-  revokedClaimRoot: BigInt;
-  oldState: BigInt;
-  newState: BigInt;
-  signatureS: BigInt;
-  signatureR8X: BigInt;
-  signatureR8Y: BigInt;
-  challenge: BigInt;
+  publicKeyX: BigInt,
+  publicKeyY: BigInt,
+  authPath: BigInt[],
+  authIndex: number,
+  claimRoot: BigInt,
+  revokedClaimRoot: BigInt,
+  oldState: BigInt,
+  newState: BigInt,
+  signatureS: BigInt,
+  signatureR8X: BigInt,
+  signatureR8Y: BigInt,
 }
 
 export interface StateTransitionByECDSASignatureWitness {
@@ -130,7 +135,6 @@ export interface StateTransitionByECDSASignatureWitness {
   oldState: BigInt;
   newState: BigInt;
   signature: number[];
-  challenge: BigInt;
 }
 
 export interface ClaimExistenceProofWitness {
@@ -206,3 +210,9 @@ export interface ECDSAClaimQueryWitness {
   mpWitness: MembershipSetProofWitness;
   nmpWitness: NonMembershipSetProofWitness;
 }
+export * as state from "./state/state.js";
+export * as indexedMerkleTree from "./tree/indexed-merkle-tree.js";
+export * as normalMerkleTree from "./tree/normal-merkle-tree.js";
+export * as merkleTree from "./tree/merkle-tree.js";
+export * as keys from "./utils/keys.js";
+export * as bits from "./utils/bits.js";

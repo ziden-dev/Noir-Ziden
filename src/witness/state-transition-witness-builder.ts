@@ -55,11 +55,6 @@ export class StateTransitionByECDSASignatureWitnessBuilder {
         return this;
     }
 
-    withChallenge(challenge: BigInt) {
-        this.witness.challenge = challenge;
-        return this;
-    }
-
     build(): Map<number, string> {
         const witnessMap = new Map<number, string>();
         var inputs = flattenObject(this.witness);
@@ -84,7 +79,7 @@ export class StateTransitionByEDDSASignatureWitnessBuilder {
     }
 
 
-    withPublicKey(publicKeyX: number[], publicKeyY: number[]) {
+    withPublicKey(publicKeyX: BigInt, publicKeyY: BigInt) {
         this.witness.publicKeyX = publicKeyX;
         this.witness.publicKeyY = publicKeyY;
         return this;
@@ -132,11 +127,6 @@ export class StateTransitionByEDDSASignatureWitnessBuilder {
 
     withSignatureR8Y(signatureR8Y: BigInt) {
         this.witness.signatureR8Y = signatureR8Y;
-        return this;
-    }
-
-    withChallenge(challenge: BigInt) {
-        this.witness.challenge = challenge;
         return this;
     }
 

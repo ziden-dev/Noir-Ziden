@@ -35,8 +35,8 @@ function getDefaultIopECDSAWitness(n: number) {
 
 export function getDefaultStateTransitionEDDSAWitness(n: number) {
     const defaultStateTransitionEDDSAWitness: StateTransitionByEDDSASignatureWitness = {
-        publicKeyX: new Array(32).fill(0),
-        publicKeyY: new Array(32).fill(0),
+        publicKeyX: 0n,
+        publicKeyY: 0n,
         authPath: new Array(n).fill(0n),
         authIndex: 0,
         claimRoot: 0n,
@@ -45,8 +45,7 @@ export function getDefaultStateTransitionEDDSAWitness(n: number) {
         newState: 0n,
         signatureS: 0n,
         signatureR8X: 0n,
-        signatureR8Y: 0n,
-        challenge: 0n
+        signatureR8Y: 0n
     }
 
     return defaultStateTransitionEDDSAWitness;
@@ -62,8 +61,7 @@ export function getDefaultStateTransitionECDSAWitness(n: number) {
         revokedClaimRoot: 0n,
         oldState: 0n,
         newState: 0n,
-        signature: new Array(64).fill(0),
-        challenge: 0n
+        signature: new Array(64).fill(0)
     }
     return defaultStateTransitionECDSAWitness;
 }

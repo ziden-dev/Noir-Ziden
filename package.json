@@ -1,10 +1,14 @@
 {
-  "name": "@zidendev/noir-ziden",
-  "version": "0.0.1",
+  "name": "@chung0807/ziden-noir",
+  "version": "0.0.2",
   "type": "module",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "dependencies": {
     "@aztec/bb.js": "^0.3.6",
     "@noir-lang/acvm_js": "git+https://git@github.com/noir-lang/acvm-simulator-wasm.git#b9d9ca9dfc5140839f23998d9466307215607c42",
+    "@openzeppelin/contracts": "^4.9.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "@typechain/ethers-v5": "^10.1.0",
     "@types/eccrypto": "^1.1.3",
     "bigint-buffer": "^1.1.5",
@@ -15,8 +19,10 @@
     "hardhat-gas-reporter": "^1.0.8",
     "keccak256": "^1.0.6",
     "save-dev": "^0.0.1-security",
+    "solidity-bytes-utils": "^0.8.0",
     "solidity-coverage": "^0.8.1",
     "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.1",
     "typechain": "^8.1.0"
   },
   "devDependencies": {
